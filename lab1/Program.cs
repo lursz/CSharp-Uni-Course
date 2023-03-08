@@ -18,9 +18,8 @@ class Program2
         else
             sw = new StreamWriter(nazwaPliku);
 
-
         String input = "";
-        Console.WriteLine("Wprowadź tekst do pliku, aby zakończyć wprowadzenie napisz 'koniec!'");
+        Console.WriteLine("Input your text, then type 'koniec!' to exit insert mode");
         input = Console.ReadLine();
         while (input != "koniec!")
         {
@@ -45,7 +44,7 @@ class Program3
     {
         if (args.Length <= 1)
         {
-            Console.WriteLine("To few arguments");
+            Console.WriteLine("Too few arguments");
             return;
         }
 
@@ -61,9 +60,8 @@ class Program3
             int position = line.IndexOf(to_find);
             if (position != -1)
             {
-                Console.WriteLine($"linijka: {line_number}, pozycja: {position}");
+                Console.WriteLine($"line: {line_number}, position: {position}");
             }
-            
         }
         sr.Close();
 
@@ -80,7 +78,7 @@ class Program4
     {
         if (args.Length <= 5)
         {
-            Console.WriteLine("To few arguments");
+            Console.WriteLine("Too few arguments");
             return;
         }
 
@@ -112,7 +110,6 @@ class Program4
                 int number = random.Next(min_value, max_value);
                 sw.WriteLine(number);
             }
-
         }
         else
         {
@@ -126,7 +123,7 @@ class Program4
             }
 
         }
-    sw.Close();
+        sw.Close();
     }
 }
 
@@ -141,7 +138,7 @@ class Program5
     {
         if (args.Length < 1)
         {
-            Console.WriteLine("To few arguments");
+            Console.WriteLine("Too few arguments");
             return;
         }
         StreamReader sr = new StreamReader(args[0]);
@@ -151,9 +148,8 @@ class Program5
         float max_number = 0;
         float min_number = 0;
         float sum = 0;
-        float average = 0;
 
-        while(!sr.EndOfStream)
+        while (!sr.EndOfStream)
         {
             string line = sr.ReadLine();
             lines_count++;
@@ -165,17 +161,17 @@ class Program5
             if (number < min_number)
                 min_number = number;
             sum += number;
-            
+
         }
 
         sr.Close();
 
         System.Console.WriteLine($"Liczba linijek: {lines_count}");
         System.Console.WriteLine($"Liczba znaków: {signs_count}");
-        System.Console.WriteLine($"Maksymalna liczba: {max_number}");   
+        System.Console.WriteLine($"Maksymalna liczba: {max_number}");
         System.Console.WriteLine($"Minimalna liczba: {min_number}");
         System.Console.WriteLine($"Suma: {sum}");
-        System.Console.WriteLine($"Średnia: {sum/lines_count}");
+        System.Console.WriteLine($"Średnia: {sum / lines_count}");
     }
 }
 
