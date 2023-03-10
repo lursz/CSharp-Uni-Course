@@ -39,11 +39,11 @@ public class OsobaFizyczna : PosiadaczRachunku
     /* ------------------------------- */
     public OsobaFizyczna(string imie_, string nazwisko_, string drugieImie_, string pesel_, string numerPaszportu_)
     {
-        if (pesel_ == null || numerPaszportu_ == null)
+        if (pesel_ == null && numerPaszportu_ == null)
         {
             throw new Exception("Pesel and passport number cannot be null");
         }
-        if (pesel_.Length != 11)
+        if (pesel_==null || pesel_.Length != 11)
         {
             throw new Exception("Pesel must be 11 characters long");
         }
@@ -170,32 +170,32 @@ public class RachunekBankowy : Object
 /* ------------------------------- Transakcja ------------------------------- */
 public class Transakcja : Object
 {
-    private RachunekBankowy rachunekZrodlowy;
-    private RachunekBankowy rachunekDocelowy;
+    private RachunekBankowy ?rachunekZrodlowy;
+    private RachunekBankowy ?rachunekDocelowy;
     private decimal kwota;
     private string opis;
 
-    public RachunekBankowy RachunekDocelowy { get => rachunekDocelowy; set => rachunekDocelowy = value; }
-    public RachunekBankowy RachunekZrodlowy { get => rachunekZrodlowy; set => rachunekZrodlowy = value; }
+    public RachunekBankowy? RachunekZrodlowy { get => rachunekZrodlowy; set => rachunekZrodlowy = value; }
+    public RachunekBankowy? RachunekDocelowy { get => rachunekDocelowy; set => rachunekDocelowy = value; }
     public decimal Kwota { get => kwota; set => kwota = value; }
     public string Opis { get => opis; set => opis = value; }
 
-    public Transakcja(RachunekBankowy rachunekZrodlowy_, RachunekBankowy rachunekDocelowy_, decimal kwota_, string opis_)
+    public Transakcja(RachunekBankowy? rachunekZrodlowy_, RachunekBankowy? rachunekDocelowy_, decimal kwota_, string opis_)
     {
-        if (rachunekZrodlowy_ == null || rachunekDocelowy_ == null)
+        if (rachunekZrodlowy_ == null && rachunekDocelowy_ == null)
         {
             throw new Exception("Source and destination account cannot be null");
         }
 
         rachunekZrodlowy = rachunekZrodlowy_;
-        rachunekDocelowy = rachunekDocelowy_;
+        RachunekDocelowy = rachunekDocelowy_;
         kwota = kwota_;
         opis = opis_;
 
     }
     public override string ToString()
     {
-        return "Transakcja: " + rachunekZrodlowy.Numer + " -> " + rachunekDocelowy.Numer + " " + kwota + " " + opis;
+        return "Transakcja: " + rachunekZrodlowy?.Numer + " -> " + rachunekDocelowy?.Numer + " " + kwota + " " + opis;
     }
 }
 
@@ -204,9 +204,21 @@ public class Transakcja : Object
 /* -------------------------------------------------------------------------- */
 /*                                MAIN PROGRAM                                */
 /* -------------------------------------------------------------------------- */
-    class Program
+class Program
+{
+    static public void Main(string[] args)
     {
-        static public void Main(string[] args)
-        {
-                 }
+        OsobaFizyczna osoba1 = new OsobaFizyczna("Ja", "Ty", "Oni", "11111111111", "AX123543523");
+        OsobaFizyczna osoba2 = new OsobaFizyczna("A", "B", "C", "22222222222", "AX1233432432");
+        OsobaFizyczna osoba3 = new OsobaFizyczna("D", "E", "F", "33333333333", "AX123543523");
+        OsobaFizyczna osoba4 = new OsobaFizyczna("G", "H", "I", "44444444444", "AX123543523");
+
+        RachunekBankowy r1 = new RachunekBankowy("1234567890", 1000, true, new List<PosiadaczRachunku> { osoba1, osoba2 });
+        RachunekBankowy r2 = new RachunekBankowy("0987654321", 2000, true, new List<PosiadaczRachunku> { osoba3, osoba4 });
+        RachunekBankowy r3 = new RachunekBankowy("1234567890", 3000, true, new List<PosiadaczRachunku> { osoba1, osoba2, osoba3, osoba4 });
+
+        
+
+        
     }
+}
