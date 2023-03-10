@@ -207,7 +207,7 @@ class Program
 {
     static public void Main(string[] args)
     {
-        OsobaFizyczna osoba1 = new OsobaFizyczna("Ja", "Ty", "Oni", "11111111111", "AX123543523");
+        OsobaFizyczna osoba1 = new OsobaFizyczna("Ja", "Ty", "Oni", "11111111111", "BV123543523");
         OsobaFizyczna osoba2 = new OsobaFizyczna("A", "B", "C", "22222222222", "AW1233432432");
         OsobaFizyczna osoba3 = new OsobaFizyczna("D", "E", "F", "33333333333", "AI123543523");
         OsobaFizyczna osoba4 = new OsobaFizyczna("G", "H", "I", "44444444444", "AL123543523");
