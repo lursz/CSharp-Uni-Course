@@ -39,7 +39,7 @@ public class OsobaFizyczna : PosiadaczRachunku
     /* ------------------------------- */
     public OsobaFizyczna(string imie_, string nazwisko_, string drugieImie_, string pesel_, string numerPaszportu_)
     {
-        if (pesel_ == null && numerPaszportu_ == null)
+        if (pesel_ == null || numerPaszportu_ == null)
         {
             throw new Exception("Pesel and passport number cannot be null");
         }
@@ -204,14 +204,111 @@ public class Transakcja : Object
 /* -------------------------------------------------------------------------- */
 /*                                MAIN PROGRAM                                */
 /* -------------------------------------------------------------------------- */
-class Program
-{
-    static void Main(string[] args)
+    class Program
     {
-        OsobaFizyczna osoba1 = new OsobaFizyczna("Jan", "Kowalski", "Janusz", "12345678901", "123456789");
-        OsobaFizyczna osoba2 = new OsobaFizyczna("Adam", "Nowak", "Adamowski", "12345678902", "123456780");
-        OsobaFizyczna osoba3 = new OsobaFizyczna("Piotr", "Kowalski", "Piotrus", "12345678903", "123456781");
+        static public void Main(string[] args)
+        {
+            Console.WriteLine("test main klasy lab02");
+            OsobaFizyczna osoba1 = new OsobaFizyczna("Ja", "Ty", "Klockiewcz", "11111111111", "AX123543523");
+            OsobaFizyczna osoba2 =
+                new OsobaFizyczna("Norbert2", "Grzegorz2", "Klockiewicz2", "22222222222", "AX1233432432");
+            List<PosiadaczRachunku> posiadacze = new List<PosiadaczRachunku>();
+            Console.WriteLine(osoba1.ToString());
+            Console.WriteLine(osoba2.ToString());
+            posiadacze.Add(osoba1);
+            posiadacze.Add(osoba2);
+            OsobaPrawna osobaP = new OsobaPrawna("osoba_prawna", "Kraków");
+            posiadacze.Add(osobaP);
+            Console.WriteLine(osobaP);
+            RachunekBankowy rachunek = new RachunekBankowy("AB1231312312312312", 125.14m, true, posiadacze);
+            Console.WriteLine(rachunek.ToString()); 
+            RachunekBankowy rachunek2 = new RachunekBankowy("AB121212121212", 250.12m, false, posiadacze);
 
-        RachunekBankowy rachunek1 = new RachunekBankowy("12345678901234567890123456", 1000, true, new List<PosiadaczRachunku> { osoba1, osoba2 });
+            RachunekBankowy.DokonajTransakcji(rachunek, rachunek2, 25.12m, "przelew z 1 na 2");
+            Console.WriteLine(rachunek.ToString()); 
+            RachunekBankowy.DokonajTransakcji(null, rachunek, 50.12m, "wplata");
+            Console.WriteLine(rachunek.ToString());
+            RachunekBankowy.DokonajTransakcji(rachunek, null, 120.15m, "wyplata");
+
+            Console.WriteLine(rachunek.ToString()); 
+            rachunek -= osoba1;
+            Console.WriteLine(rachunek.ToString()); 
+            rachunek += osoba1;
+            
+            try
+            {
+                OsobaFizyczna osoba3 = new OsobaFizyczna("Norbert3", "Klockiewicz", "", "AFSA@#42", "AV241143");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
+            try
+            {
+                RachunekBankowy.DokonajTransakcji(null, null, 300.15m, "wyplata");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
+            try
+            {
+                RachunekBankowy.DokonajTransakcji(rachunek2, null, 300.15m, "wyplata");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
+            try
+            {
+                RachunekBankowy.DokonajTransakcji(rachunek2, null, -115m, "wyplata");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            try
+            {
+                RachunekBankowy rachunek3 =
+                    new RachunekBankowy("AB121212121212", 250.12m, false, new List<PosiadaczRachunku>());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
+            OsobaFizyczna osoba4 = new OsobaFizyczna("Norbert4", "Grzegorz4", "Klockiewicz4", "44444444444", "AX1233432432");
+            try
+            {
+                rachunek = rachunek - osoba4;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            rachunek = rachunek + osoba4;
+
+            try
+            {
+                rachunek = rachunek + osoba4;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            try
+            {
+                OsobaFizyczna osoba5 = new OsobaFizyczna("Norbert5", "Grzegorz5", "Klockiewicz5", null, null);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
     }
-}
