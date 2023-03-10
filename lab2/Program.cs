@@ -24,7 +24,16 @@ public class OsobaFizyczna : PosiadaczRachunku
     public string Imie { get => imie; set => imie = value; }
     public string Nazwisko { get => nazwisko; set => nazwisko = value; }
     public string DrugieImie { get => drugieImie; set => drugieImie = value; }
-    public string Pesel { get => pesel; set => pesel = value; }
+    public string Pesel
+    {
+        get => pesel;
+        set
+        {
+            if (value.Length != 11)
+                throw new Exception("Pesel must be 11 characters long");
+            pesel = value;
+        }
+    }
     public string NumerPaszportu { get => numerPaszportu; set => numerPaszportu = value; }
 
     /* ------------------------------- */
@@ -34,14 +43,17 @@ public class OsobaFizyczna : PosiadaczRachunku
         {
             throw new Exception("Pesel and passport number cannot be null");
         }
-        else
+        if (pesel_.Length != 11)
         {
-            imie = imie_;
-            nazwisko = nazwisko_;
-            drugieImie = drugieImie_;
-            pesel = pesel_;
-            numerPaszportu = numerPaszportu_;
+            throw new Exception("Pesel must be 11 characters long");
         }
+
+        imie = imie_;
+        nazwisko = nazwisko_;
+        drugieImie = drugieImie_;
+        pesel = pesel_;
+        numerPaszportu = numerPaszportu_;
+
     }
     // pesel_ = pesel ?? throw new Exception("Pesel and passport number cannot be null");
     // numerPaszportu_ = numerPaszportu ?? throw new Exception("Pesel and passport number cannot be null");
@@ -72,7 +84,7 @@ public class OsobaPrawna : PosiadaczRachunku
     }
 }
 /* ----------------------------- RachunekBankowy ---------------------------- */
-public class RachunekBankowy
+public class RachunekBankowy : Object
 {
     private string numer;
     private decimal stanRachunku;
@@ -92,13 +104,10 @@ public class RachunekBankowy
         {
             throw new Exception("List of account holders cannot be empty");
         }
-        else
-        {
-            numer = numer_;
-            stanRachunku = stanRachunku_;
-            czyDozwolonyDebet = czyDozwolonyDebet_;
-            PosiadaczeRachunku = _PosiadaczeRachunku_;
-        }
+        numer = numer_;
+        stanRachunku = stanRachunku_;
+        czyDozwolonyDebet = czyDozwolonyDebet_;
+        PosiadaczeRachunku = _PosiadaczeRachunku_;
     }
     public static void DokonajTransakcji(RachunekBankowy from_, RachunekBankowy to_, decimal kwota, string opis)
     {
@@ -127,9 +136,39 @@ public class RachunekBankowy
             }
         }
     }
+    // Operator overloading
+    public static RachunekBankowy operator +(RachunekBankowy one, PosiadaczRachunku another)
+    {
+        if (one.PosiadaczeRachunku.Contains(another))
+        {
+            throw new Exception("Taki posiadacz rachunku już istnieje");
+        }
+        one.PosiadaczeRachunku.Add(another);
+        return one;
+    }
+
+    public static RachunekBankowy operator -(RachunekBankowy one, PosiadaczRachunku another)
+    {
+        if (one.PosiadaczeRachunku.Count == 1)
+        {
+            throw new Exception("List posiadaczy rachunku nie może być pusta");
+        }
+        if (!one.PosiadaczeRachunku.Contains(another))
+        {
+            throw new Exception("Posiadacza rachunku nie ma na liście");
+        }
+        one.PosiadaczeRachunku.Remove(another);
+        return one;
+    }
+
+    public override string ToString()
+    {
+        return "RachunekBankowy: " + numer + " " + stanRachunku + " " + czyDozwolonyDebet + " " + PosiadaczeRachunku;
+    }
+
 }
 /* ------------------------------- Transakcja ------------------------------- */
-public class Transakcja
+public class Transakcja : Object
 {
     private RachunekBankowy rachunekZrodlowy;
     private RachunekBankowy rachunekDocelowy;
@@ -147,13 +186,16 @@ public class Transakcja
         {
             throw new Exception("Source and destination account cannot be null");
         }
-        else
-        {
-            rachunekZrodlowy = rachunekZrodlowy_;
-            rachunekDocelowy = rachunekDocelowy_;
-            kwota = kwota_;
-            opis = opis_;
-        }
+
+        rachunekZrodlowy = rachunekZrodlowy_;
+        rachunekDocelowy = rachunekDocelowy_;
+        kwota = kwota_;
+        opis = opis_;
+
+    }
+    public override string ToString()
+    {
+        return "Transakcja: " + rachunekZrodlowy.Numer + " -> " + rachunekDocelowy.Numer + " " + kwota + " " + opis;
     }
 }
 
