@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +29,6 @@ namespace lab3
                 var tweet = JsonSerializer.Deserialize<Tweet>(line);
                 array_of_tweets.Add(tweet);
             }
-            // String jsonString = System.IO.File.ReadAllText(json_name);
-            // array_of_tweets = JsonSerializer.Deserialize<List<Tweet>>(jsonString);
 
         }
 
@@ -46,6 +45,12 @@ namespace lab3
         public void readFromXML(string xml_name)
         {
             StreamReader reader = new StreamReader(xml_name);
+            System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(Tweet));
+            while (reader.Peek() != -1)
+            {
+                Tweet tweet = (Tweet)x.Deserialize(reader);
+                array_of_tweets.Add(tweet);
+            }
 
         }
 
@@ -98,13 +103,15 @@ namespace lab3
             Dictionary<string, int> dict = new Dictionary<string, int>();
             foreach (var i in array_of_tweets)
             {
-                string[] words = i.Text.Split(' ');
+                // string [] words = Tweet.reg.Split(i.Text);
+                string[] words = i.Text.Split(' ', '.', ',', '!', '?', ':', ';', '-', '(', ')', '[', ']', '{', '}', '/', '\\', '"', '\'', '\t', '\n', '\r');
                 foreach (var word in words)
                 {
-                    if (dict.ContainsKey(word))
-                        dict[word]++;
+                    String word_low = word.ToLower();
+                    if (dict.ContainsKey(word_low))
+                        dict[word_low]++;
                     else
-                        dict.Add(word, 1);
+                        dict.Add(word_low, 1);
                 }
             }
             dict = dict.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
@@ -119,7 +126,7 @@ namespace lab3
             int counter = 0;
             for (int i = 0; i < dict.Count; i++)
             {
-                if (dict.ElementAt(i).Key.Length > 5)
+                if (dict.ElementAt(i).Key.Length >= 5)
                 {
                     result.Add(dict.ElementAt(i).Key, dict.ElementAt(i).Value);
                     counter++;
@@ -130,9 +137,18 @@ namespace lab3
             return result;
         }
 
+
+        /* ----------------------------------- IDF ---------------------------------- */
         public void Top10IDF()
         {
-            
+
+        }
+
+        public void TermFrequency()
+        {
+
+
+
         }
 
         /* -------------------------------- Printing -------------------------------- */

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices.ComTypes;
+using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,16 +17,21 @@ class Program
         data.readFromJson("favorite-tweets.jsonl");
         data.convToXML("favorite-tweets.xml");
 
-        data.sortByDate();
-        for (int i = 0; i < 10; i++)
+        Dictionary<string, int> dict = new Dictionary<string, int>();
+        dict = data.frequencyOfWords();
+        Dictionary <string,int> dict_top10 = new Dictionary<string, int>(); 
+        
+        dict_top10 = data.Top10Words();
+        foreach (var i in dict_top10)
         {
-            Console.WriteLine(data.array_of_tweets[i].CreatedAt);
+            System.Console.WriteLine(i.Key + " " + i.Value);
         }
+
         System.Console.WriteLine("-----------");
         System.Console.WriteLine(data.findNewestTweet().CreatedAt);
         System.Console.WriteLine(data.findOldestTweet().CreatedAt);
 
-        System.Console.WriteLine(data.Top10Words());
+        
 
         
         

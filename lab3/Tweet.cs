@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 namespace lab3
 {
     public class Tweet
@@ -8,7 +9,7 @@ namespace lab3
         public String? FirstLinkUrl { get; set; }
         public String? CreatedAt { get; set; }
         public String? TweetEmbedCode { get; set; }
-
+        public static Regex reg = new Regex(@"[@a-zA-Z]+");
         public Tweet()
         {
         }
