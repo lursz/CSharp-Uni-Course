@@ -13,7 +13,7 @@ namespace lab3
     public class Data
     {
         public List<Tweet>? array_of_tweets { get; set; }
-        string date_format = "MMMM d, yyyy 'at' hh:mmtt";
+        string date_format = "MMMM dd, yyyy 'at' hh:mmtt";
 
 
         /* ------------------------------------------------------------------------- */
@@ -36,7 +36,7 @@ namespace lab3
 
         public void saveToXML(string xml_name)
         {
-            
+
             System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(List<Tweet>));
             TextWriter writer = new StreamWriter(xml_name);
 
@@ -49,7 +49,7 @@ namespace lab3
         {
             StreamReader reader = new StreamReader(xml_name);
             System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(List<Tweet>));
-            
+
             array_of_tweets = (List<Tweet>)x.Deserialize(reader);
 
         }
@@ -145,51 +145,42 @@ namespace lab3
 
         public Dictionary<string, double> Top10IDF()
         {
-            // Term frequency
-            List<Dictionary<string, int>> list = new List<Dictionary<string, int>>();
-            Dictionary<string, int> temp_dict = new Dictionary<string, int>();
-            foreach (var i in array_of_tweets)
-            {
-                string[] words = i.Text.Split(' ', '.', ',', '!', '?', ':', ';', '-', '(', ')', '[', ']', '{', '}', '/', '\\', '"', '\'', '\t', '\n', '\r');
-                foreach (var word in words)
-                {
-                    String word_low = word.ToLower();
-                    if (temp_dict.ContainsKey(word_low))
-                        temp_dict[word_low]++;
-                    else
-                        temp_dict.Add(word_low, 1);
-                }
-                list.Add(temp_dict);
-                temp_dict = new Dictionary<string, int>();
-            }
-
-
-            // Inverse document frequency
+            // Dictionary of 'word' : 'in how many tweets it appears'
             Dictionary<string, int> dict = new Dictionary<string, int>();
             foreach (var i in array_of_tweets)
             {
+                List<string> read_words = new List<string>();
                 string[] words = i.Text.Split(' ', '.', ',', '!', '?', ':', ';', '-', '(', ')', '[', ']', '{', '}', '/', '\\', '"', '\'', '\t', '\n', '\r');
                 foreach (var word in words)
                 {
                     String word_low = word.ToLower();
-                    if (dict.ContainsKey(word_low))
-                        dict[word_low]++;
-                    else
-                        dict.Add(word_low, 1);
+                    if (!read_words.Contains(word_low))
+                    {
+                        if (dict.ContainsKey(word_low))
+                            dict[word_low]++;
+                        else
+                            dict.Add(word_low, 1);
+                        read_words.Add(word_low);
+                    }
+         
                 }
             }
-
-            // TF-IDF
-            Dictionary<string, double> tf_idf = new Dictionary<string, double>();
-            foreach (var i in list)
+            // Dictionary of 'word' : 'log_e(array_of_tweets.Count / dict[word])'
+            Dictionary<string, double> result = new Dictionary<string, double>();
+            foreach (var i in dict)
             {
-                foreach (var j in i)
-                {
-                    tf_idf.Add(j.Key, j.Value * Math.Log(array_of_tweets.Count / dict[j.Key]));
-                }
+                result.Add(i.Key, Math.Log(array_of_tweets.Count / i.Value));
             }
-            return tf_idf.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-
+            result = result.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            
+            // return first 10 elements of result
+            Dictionary<string, double> result_top_10 = new Dictionary<string, double>();
+    
+            for (int i = 0; i < 10; i++)
+            {
+                result_top_10.Add(result.ElementAt(i).Key, result.ElementAt(i).Value);
+            }   
+            return result_top_10;
         }
 
         /* -------------------------------- Printing -------------------------------- */
