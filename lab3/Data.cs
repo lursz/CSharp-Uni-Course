@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using System.Text.RegularExpressions;
 using System;
 using System.Collections.Generic;
@@ -5,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.Xml.Serialization;
+using System.Xml;
 
 namespace lab3
 {
@@ -32,25 +34,23 @@ namespace lab3
 
         }
 
-        public void convToXML(string xml_name)
+        public void saveToXML(string xml_name)
         {
-            StreamWriter writer = new StreamWriter(xml_name);
-            foreach (var i in array_of_tweets)
-            {
-                var x = new System.Xml.Serialization.XmlSerializer(i.GetType());
-                x.Serialize(writer, i);
-            }
+            
+            System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(List<Tweet>));
+            TextWriter writer = new StreamWriter(xml_name);
+
+            x.Serialize(writer, array_of_tweets);
+            writer.Close();
         }
+
 
         public void readFromXML(string xml_name)
         {
             StreamReader reader = new StreamReader(xml_name);
-            System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(Tweet));
-            while (reader.Peek() != -1)
-            {
-                Tweet tweet = (Tweet)x.Deserialize(reader);
-                array_of_tweets.Add(tweet);
-            }
+            System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(List<Tweet>));
+            
+            array_of_tweets = (List<Tweet>)x.Deserialize(reader);
 
         }
 
@@ -139,15 +139,56 @@ namespace lab3
 
 
         /* ----------------------------------- IDF ---------------------------------- */
-        public void Top10IDF()
+
+
+
+
+        public Dictionary<string, double> Top10IDF()
         {
+            // Term frequency
+            List<Dictionary<string, int>> list = new List<Dictionary<string, int>>();
+            Dictionary<string, int> temp_dict = new Dictionary<string, int>();
+            foreach (var i in array_of_tweets)
+            {
+                string[] words = i.Text.Split(' ', '.', ',', '!', '?', ':', ';', '-', '(', ')', '[', ']', '{', '}', '/', '\\', '"', '\'', '\t', '\n', '\r');
+                foreach (var word in words)
+                {
+                    String word_low = word.ToLower();
+                    if (temp_dict.ContainsKey(word_low))
+                        temp_dict[word_low]++;
+                    else
+                        temp_dict.Add(word_low, 1);
+                }
+                list.Add(temp_dict);
+                temp_dict = new Dictionary<string, int>();
+            }
 
-        }
 
-        public void TermFrequency()
-        {
+            // Inverse document frequency
+            Dictionary<string, int> dict = new Dictionary<string, int>();
+            foreach (var i in array_of_tweets)
+            {
+                string[] words = i.Text.Split(' ', '.', ',', '!', '?', ':', ';', '-', '(', ')', '[', ']', '{', '}', '/', '\\', '"', '\'', '\t', '\n', '\r');
+                foreach (var word in words)
+                {
+                    String word_low = word.ToLower();
+                    if (dict.ContainsKey(word_low))
+                        dict[word_low]++;
+                    else
+                        dict.Add(word_low, 1);
+                }
+            }
 
-
+            // TF-IDF
+            Dictionary<string, double> tf_idf = new Dictionary<string, double>();
+            foreach (var i in list)
+            {
+                foreach (var j in i)
+                {
+                    tf_idf.Add(j.Key, j.Value * Math.Log(array_of_tweets.Count / dict[j.Key]));
+                }
+            }
+            return tf_idf.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
 
         }
 

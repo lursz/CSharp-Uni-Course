@@ -15,7 +15,8 @@ class Program
     {
         Data data = new Data();
         data.readFromJson("favorite-tweets.jsonl");
-        data.convToXML("favorite-tweets.xml");
+        data.saveToXML("favorite-tweets.xml");
+        data.readFromXML("favorite-tweets.xml");
 
         Dictionary<string, int> dict = new Dictionary<string, int>();
         dict = data.frequencyOfWords();
@@ -31,6 +32,8 @@ class Program
         System.Console.WriteLine(data.findNewestTweet().CreatedAt);
         System.Console.WriteLine(data.findOldestTweet().CreatedAt);
 
+        System.Console.WriteLine("-----------");
+        System.Console.WriteLine(data.Top10IDF());
         
 
         
