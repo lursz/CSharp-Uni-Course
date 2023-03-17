@@ -175,7 +175,6 @@ namespace lab3
 
             // return first 10 elements of result
             Dictionary<string, double> result_top_10 = new Dictionary<string, double>();
-
             for (int i = 0; i < 10; i++)
             {
                 result_top_10.Add(result.ElementAt(i).Key, result.ElementAt(i).Value);
