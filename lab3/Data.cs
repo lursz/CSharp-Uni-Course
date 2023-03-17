@@ -56,7 +56,7 @@ namespace lab3
         }
         public void sortByDate()
         {
-            array_of_tweets.OrderBy(x => DateTime.ParseExact(x.CreatedAt, date_format, null));
+            array_of_tweets.Sort((x, y) => DateTime.ParseExact(x.CreatedAt, date_format, null).CompareTo(DateTime.ParseExact(y.CreatedAt, date_format, null)));
         }
         public void sortByNameAndDate()
         {
