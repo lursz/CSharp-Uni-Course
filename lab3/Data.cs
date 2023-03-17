@@ -162,7 +162,7 @@ namespace lab3
                             dict.Add(word_low, 1);
                         read_words.Add(word_low);
                     }
-         
+
                 }
             }
             // Dictionary of 'word' : 'log_e(array_of_tweets.Count / dict[word])'
@@ -172,14 +172,14 @@ namespace lab3
                 result.Add(i.Key, Math.Log(array_of_tweets.Count / i.Value));
             }
             result = result.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-            
+
             // return first 10 elements of result
             Dictionary<string, double> result_top_10 = new Dictionary<string, double>();
-    
+
             for (int i = 0; i < 10; i++)
             {
                 result_top_10.Add(result.ElementAt(i).Key, result.ElementAt(i).Value);
-            }   
+            }
             return result_top_10;
         }
 
