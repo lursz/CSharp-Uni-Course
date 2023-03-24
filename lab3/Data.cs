@@ -31,12 +31,10 @@ namespace lab3
                 var tweet = JsonSerializer.Deserialize<Tweet>(line);
                 array_of_tweets.Add(tweet);
             }
-
         }
 
         public void saveToXML(string xml_name)
         {
-
             System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(List<Tweet>));
             TextWriter writer = new StreamWriter(xml_name);
 
@@ -51,7 +49,6 @@ namespace lab3
             System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(List<Tweet>));
 
             array_of_tweets = (List<Tweet>)x.Deserialize(reader);
-
         }
 
         /* --------------------------------- Sorting -------------------------------- */
@@ -59,10 +56,14 @@ namespace lab3
         {
             array_of_tweets.Sort((x, y) => x.UserName.CompareTo(y.UserName));
         }
+
         public void sortByDate()
         {
-            array_of_tweets.Sort((x, y) => DateTime.ParseExact(x.CreatedAt, date_format, null).CompareTo(DateTime.ParseExact(y.CreatedAt, date_format, null)));
+            array_of_tweets.Sort((x, y) =>
+                DateTime.ParseExact(x.CreatedAt, date_format, null)
+                    .CompareTo(DateTime.ParseExact(y.CreatedAt, date_format, null)));
         }
+
         public void sortByNameAndDate()
         {
             array_of_tweets.OrderBy(x => x.UserName).ThenBy(x => DateTime.ParseExact(x.CreatedAt, date_format, null));
@@ -73,6 +74,7 @@ namespace lab3
             var temp = array_of_tweets.OrderBy(x => DateTime.ParseExact(x.CreatedAt, date_format, null));
             return temp.First();
         }
+
         public Tweet findNewestTweet()
         {
             var temp = array_of_tweets.OrderBy(x => DateTime.ParseExact(x.CreatedAt, date_format, null));
@@ -93,6 +95,7 @@ namespace lab3
                 else
                     dict.Add(i.UserName, new List<Tweet> { i });
             }
+
             return dict;
         }
 
@@ -104,7 +107,8 @@ namespace lab3
             foreach (var i in array_of_tweets)
             {
                 // string [] words = Tweet.reg.Split(i.Text);
-                string[] words = i.Text.Split(' ', '.', ',', '!', '?', ':', ';', '-', '(', ')', '[', ']', '{', '}', '/', '\\', '"', '\'', '\t', '\n', '\r');
+                string[] words = i.Text.Split(' ', '.', ',', '!', '?', ':', ';', '-', '(', ')', '[', ']', '{', '}', '/',
+                    '\\', '"', '\'', '\t', '\n', '\r');
                 foreach (var word in words)
                 {
                     String word_low = word.ToLower();
@@ -114,6 +118,7 @@ namespace lab3
                         dict.Add(word_low, 1);
                 }
             }
+
             dict = dict.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
             System.Console.WriteLine(dict);
             return dict;
@@ -131,16 +136,16 @@ namespace lab3
                     result.Add(dict.ElementAt(i).Key, dict.ElementAt(i).Value);
                     counter++;
                 }
+
                 if (counter == 10)
                     break;
             }
+
             return result;
         }
 
 
         /* ----------------------------------- IDF ---------------------------------- */
-
-
 
 
         public Dictionary<string, double> Top10IDF()
@@ -150,7 +155,8 @@ namespace lab3
             foreach (var i in array_of_tweets)
             {
                 List<string> read_words = new List<string>();
-                string[] words = i.Text.Split(' ', '.', ',', '!', '?', ':', ';', '-', '(', ')', '[', ']', '{', '}', '/', '\\', '"', '\'', '\t', '\n', '\r');
+                string[] words = i.Text.Split(' ', '.', ',', '!', '?', ':', ';', '-', '(', ')', '[', ']', '{', '}', '/',
+                    '\\', '"', '\'', '\t', '\n', '\r');
                 foreach (var word in words)
                 {
                     String word_low = word.ToLower();
@@ -162,15 +168,16 @@ namespace lab3
                             dict.Add(word_low, 1);
                         read_words.Add(word_low);
                     }
-
                 }
             }
+
             // Dictionary of 'word' : 'log_e(array_of_tweets.Count / dict[word])'
             Dictionary<string, double> result = new Dictionary<string, double>();
             foreach (var i in dict)
             {
                 result.Add(i.Key, Math.Log(array_of_tweets.Count / i.Value));
             }
+
             result = result.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
 
             // return first 10 elements of result
@@ -179,6 +186,7 @@ namespace lab3
             {
                 result_top_10.Add(result.ElementAt(i).Key, result.ElementAt(i).Value);
             }
+
             return result_top_10;
         }
 
@@ -198,6 +206,7 @@ namespace lab3
                 Console.WriteLine(i.UserName);
             }
         }
+
         public void printAllDates()
         {
             foreach (var i in array_of_tweets)
@@ -205,9 +214,5 @@ namespace lab3
                 Console.WriteLine(i.CreatedAt);
             }
         }
-
     }
-
-
-
 }
