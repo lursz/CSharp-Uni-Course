@@ -60,14 +60,6 @@ class Program
             foreach (var j in i.S)
                 Console.WriteLine(i.R + " " + j);
 
-        // var query3 = from e in employees
-        //               join et in employeesTerritories on e.employeeid equals et.employeeid
-        //               join t in territories on et.territoryid equals t.territoryid
-        //               join r in regions on t.regionid equals r.regionid
-        //               orderby r.regiondescription
-        //               select new { R = r.regiondescription, S = e.lastname };
-        // foreach (var p in query3)
-        //     Console.WriteLine(p.R + " " + p.S);
 
         System.Console.WriteLine("\n4. Region + Count of employees working in those regions");
         var query4 = from e in employees
@@ -87,14 +79,6 @@ class Program
                      select new { E = g.Key, C = g.Count(), A = g.Average(x => x.od.unitprice * x.od.quantity - x.od.discount), M = g.Max(x => x.od.unitprice * x.od.quantity - x.od.discount) };
         foreach (var i in query5)
             Console.WriteLine(i.E.lastname + ",     count: " + i.C + ",     avg value: " + i.A + ",     max value: " + i.M);
-
-
-        // var query5 = from o in orders
-        //              join od in ordersDetails on o.orderid equals od.orderid
-        //              group od by o.employeeid into g
-        //              select new { E = g.Key, C = g.Count(), A = g.Average(x => x.unitprice * x.quantity - x.discount), M = g.Max(x => x.unitprice * x.quantity - x.discount) };
-        // foreach (var i in query5)
-        //     Console.WriteLine(i.E + " " + i.C + " " + i.A + " " + i.M);
 
 
     }
