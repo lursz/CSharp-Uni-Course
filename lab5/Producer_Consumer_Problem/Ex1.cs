@@ -80,32 +80,3 @@ namespace lab5
 
 
 
-
-
-
-
-
-
-
-// for (int i = 0; i < n; i++)
-// {
-//     Producer producer = new Producer(i, data, random.Next(100, 2000));
-//     producer.Thread = new Thread(new ThreadStart(producer.Start));
-//     producers.Add(producer);
-// }
-// for (int i = 0; i < m; i++)
-// {
-//     Consumer consumer = new Consumer(i, data, random.Next(50, 1000));
-//     consumer.Thread = new Thread(new ThreadStart(consumer.Start));
-//     consuments.Add(consumer);
-// }
-// foreach (var i in producers)
-// {
-//     i.Thread.Start();
-//     System.Console.WriteLine("Producer " + i.number + " started");
-// }
-// foreach (var i in consuments)
-// {
-//     i.Thread.Start();
-//     System.Console.WriteLine("Consumer " + i.number + " started");
-// }

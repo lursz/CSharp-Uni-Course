@@ -29,8 +29,8 @@ class Program
     private static void Main(string[] args)
     {
         Program program = new Program();
-        // program.Ex2();
-        program.Ex3();
+        program.Ex2();
+        // program.Ex3();
         // program.Ex4();
         
     }
