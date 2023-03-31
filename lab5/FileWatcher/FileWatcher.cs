@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace FileWatcher
 {
-    public class FileWatcherObject
+    public class MonitorFolder
     {
         string path;
         Thread thread;
 
-        public FileWatcherObject(string path)
+        public MonitorFolder(string path)
         {
             this.path = path;
         }
@@ -21,26 +21,32 @@ namespace FileWatcher
 
             var watcher = new FileSystemWatcher(path);
             watcher.IncludeSubdirectories = false;
-
+            watcher.EnableRaisingEvents = true;
             watcher.Created += (sender, e) => Console.WriteLine($"Created: {e.Name}");
             watcher.Deleted += (sender, e) => Console.WriteLine($"Deleted: {e.Name}");
             watcher.Changed += (sender, e) => Console.WriteLine($"Changed: {e.Name}");
             watcher.Renamed += (sender, e) => Console.WriteLine($"Renamed: {e.OldName} -> {e.Name}");
-            watcher.EnableRaisingEvents = true;
-
-            while (true)
+            Thread thread = new Thread(() =>
             {
-                System.Console.WriteLine("Press 'q' to quit");
-                var input = Console.ReadKey();
-
-                if (input.KeyChar == 'q')
+                System.Console.WriteLine("here");
+                while (true)
                 {
-                    watcher.EnableRaisingEvents = false;
-                    break;
-                }
-            }
-            Console.WriteLine("Stopped monitoring directory.");
+                    Console.WriteLine("Press 'q' to quit");
+                    var input = Console.ReadKey();
 
+                    if (input.KeyChar == 'q')
+                    {
+                        watcher.EnableRaisingEvents = false;
+                        watcher.Dispose();
+                        break;
+                    }
+                }
+                Console.WriteLine("Stopped monitoring directory.");
+            });
+            thread.Start();
         }
+
+
+
     }
 }

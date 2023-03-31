@@ -9,7 +9,11 @@ class Program
 {
     private static void Main(string[] args)
     {
-        FileWatcherObject fileWatcher = new FileWatcherObject("E:\test");
+        // MonitorFolder fileWatcher = new MonitorFolder(@"/mnt/e/test");
+        // fileWatcher.Start();
+
+        Search search = new Search(@"/mnt/e/test", "test");
+        search.Start();
         
     }
 }
