@@ -1,13 +1,15 @@
 ﻿using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices;
 using System;
-using lab5;
+using FileWatcher;
+
+
 
 class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine("Ex 1:");
-        Ex1 ex1 = new Ex1(4,5);
+        FileWatcherObject fileWatcher = new FileWatcherObject("E:\test");
+        
     }
 }

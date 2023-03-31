@@ -27,11 +27,6 @@ namespace lab5
 
 
 
-
-
-
-
-
     /* -------------------------------------------------------------------------- */
     /*                                  Producer                                  */
     /* -------------------------------------------------------------------------- */
@@ -53,7 +48,7 @@ namespace lab5
 
         public void WriteResource()
         {
-            // mutex.WaitOne();
+            // lock works just like mutex
             lock (data)
             {
                 this.data.Add(number);
