@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace FileWatcher
 {
-    public class MonitorFolder
+    public class FileWatch
     {
         string path;
         Thread thread;
 
-        public MonitorFolder(string path)
+        public FileWatch(string path)
         {
             this.path = path;
         }
@@ -47,6 +47,7 @@ namespace FileWatcher
         }
 
 
-
     }
+
 }
+

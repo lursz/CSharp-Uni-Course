@@ -19,33 +19,31 @@ namespace FileWatcher
         }
 
 
-        public void Start()
+        public void Begin()
         {
-
+            // Start new thread
             Thread searchThread = new Thread(() => SearchFiles(dirPath, searchStr));
             searchThread.Start();
 
             Console.WriteLine("Search in progress...");
-            Console.ReadLine(); // wait for user to press Enter key before exiting
+            Console.ReadLine();
         }
 
         public void SearchFiles(string dirPath, string searchStr)
         {
-            try
+
+            foreach (string filePath in Directory.GetFiles(dirPath, "*", SearchOption.AllDirectories))
             {
-                foreach (string filePath in Directory.GetFiles(dirPath, "*", SearchOption.AllDirectories))
+                if (Path.GetFileName(filePath).Contains(searchStr))
                 {
-                    if (Path.GetFileName(filePath).Contains(searchStr))
-                    {
-                        Console.WriteLine(filePath);
-                    }
+                    Console.WriteLine(filePath);
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
             }
         }
 
     }
 }
+
+
+
+

@@ -67,12 +67,12 @@ namespace lab5
         public Consumer(int number_, List<int> data_, int sleepTime_): base(number_, data_, sleepTime_)
         {
             consumed = new List<int>();
-            running = false;
+            running = true;
         }
 
         public void Start()
         {
-            while (!running)
+            while (running)
             {
                 Thread.Sleep(sleepTime);
                 ReadResource();
