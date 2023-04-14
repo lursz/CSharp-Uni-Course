@@ -52,7 +52,6 @@ public class Client
             {
                 break;
             }
-        Console.WriteLine(response);
         }
 
 

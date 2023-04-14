@@ -24,11 +24,10 @@ public class Server
         socketSerwera.Listen(100);
         //Awaiting connections
         Socket socketKlienta = socketSerwera.Accept();
-
-
         string my_dir = Directory.GetCurrentDirectory();
         Console.WriteLine($"Current Directory: {my_dir}");
 
+        /* ------------------------------ Program loop ------------------------------ */
         while (true)
         {
             byte[] sizeBuf = new byte[4];
@@ -46,6 +45,8 @@ public class Server
             }
             String message = Encoding.UTF8.GetString(buffer, 0, messageSize);
             Console.WriteLine(message);
+
+            /* -------------------------------- Commands -------------------------------- */
             string response = "";
             if (message == "!end")
             {
@@ -76,34 +77,42 @@ public class Server
                 }
                 else
                 {
-                    string newPath = Path.Combine(my_dir, name);
-                    if (Directory.Exists(newPath))
-                    {
-                        my_dir = newPath;
-                    }
-                    else
-                    {
-                        response = "directory does not exist";
-                    }
+                    my_dir = Path.Combine(my_dir, name);
                 }
+                string[] files = Directory.GetFiles(my_dir);
+                string[] directories = Directory.GetDirectories(my_dir);
+                StringBuilder sb = new StringBuilder();
+                foreach (var file in files)
+                {
+                    sb.Append(Path.GetFileName(file) + ", ");
+                }
+                foreach (var directory in directories)
+                {
+                    sb.Append(Path.GetFileName(directory) + ", ");
+                }
+                response = sb.ToString();
 
             }
+            else
+            {
+                response = "unknown command";
+            }
 
+            /* ---------------------------------- Send ---------------------------------- */
+            byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+            // Encode the response message size
+            byte[] responseSizeBytes = BitConverter.GetBytes(responseBytes.Length);
+            // Send the response message size
+            socketKlienta.Send(responseSizeBytes, SocketFlags.None);
+            // Send the response message
+            socketKlienta.Send(responseBytes, SocketFlags.None);
+            try
+            {
+                socketSerwera.Shutdown(SocketShutdown.Both);
+                socketSerwera.Close();
+            }
+            catch { }
 
-                byte[] responseBytes = Encoding.UTF8.GetBytes(response);
-                // Encode the response message size
-                byte[] responseSizeBytes = BitConverter.GetBytes(responseBytes.Length);
-                // Send the response message size
-                socketKlienta.Send(responseSizeBytes, SocketFlags.None);
-                // Send the response message
-                socketKlienta.Send(responseBytes, SocketFlags.None);
-                try
-                {
-                    socketSerwera.Shutdown(SocketShutdown.Both);
-                    socketSerwera.Close();
-                }
-                catch { }
-            
         }
 
     }
