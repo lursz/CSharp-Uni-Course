@@ -9,10 +9,9 @@ public class Client
 {
     public static void Main()
     {
+        /* ------------------------------ Configuration ----------------------------- */
         System.Console.WriteLine("Client started");
-        //Server host
         IPHostEntry host = Dns.GetHostEntry("localhost");
-        //Choosing first address from list
         IPAddress ipAddress = host.AddressList[0];
         IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
 
@@ -22,20 +21,24 @@ public class Client
             ProtocolType.Tcp);
         //Connecting
         socket.Connect(localEndPoint);
-
+        /* ------------------------------ Program loop ------------------------------ */
         while (true)
         {
+            /* ---------------------------------- Read ---------------------------------- */
             Console.Write("> ");
-            string message = Console.ReadLine();
-            if (message == "")
+            string input = Console.ReadLine();
+            if (input == "")
             {
                 continue;
             }
-            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
+            /* ---------------------------------- Send ---------------------------------- */
+            byte[] messageBytes = Encoding.UTF8.GetBytes(input);
             byte[] sizeBytes = BitConverter.GetBytes(messageBytes.Length);
             socket.Send(sizeBytes, SocketFlags.None);
             socket.Send(messageBytes, SocketFlags.None);
 
+            /* --------------------------------- Receive -------------------------------- */
             byte[] responseSizeBytes = new byte[4];
             socket.Receive(responseSizeBytes, 4, SocketFlags.None);
             int responseSize = BitConverter.ToInt32(responseSizeBytes, 0);
@@ -48,19 +51,22 @@ public class Client
             }
             string response = Encoding.UTF8.GetString(responseBytes, 0, responseSize);
             Console.WriteLine(response);
-            if (message == "!end")
+
+
+            if (input == "!end")
             {
                 break;
             }
         }
-
-
         try
         {
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
         }
-        catch { }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+        }
 
     }
 

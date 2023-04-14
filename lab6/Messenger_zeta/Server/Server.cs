@@ -6,6 +6,7 @@ using System.Text;
 
 public class Server
 {
+
     public static void Main()
     {
         /* ------------------------------ Configuration ----------------------------- */
@@ -25,17 +26,20 @@ public class Server
         //Awaiting connections
         Socket socketKlienta = socketSerwera.Accept();
         string my_dir = Directory.GetCurrentDirectory();
-        Console.WriteLine($"Current Directory: {my_dir}");
 
         /* ------------------------------ Program loop ------------------------------ */
         while (true)
         {
+            Console.WriteLine($"Current Directory: {my_dir}");
+
+            /* --------------------------------- Receive -------------------------------- */
+            // Message size
             byte[] sizeBuf = new byte[4];
             int received = socketKlienta.Receive(sizeBuf, 4, SocketFlags.None);
-            // Decode the message size
             int messageSize = BitConverter.ToInt32(sizeBuf, 0);
             // Buffer for message
             byte[] buffer = new byte[messageSize];
+
             // Blocking call, waiting for message
             int receivedTotal = 0;
             while (receivedTotal < messageSize)
@@ -55,43 +59,27 @@ public class Server
             }
             else if (message == "list")
             {
-                string[] files = Directory.GetFiles(my_dir);
-                string[] directories = Directory.GetDirectories(my_dir);
-                StringBuilder sb = new StringBuilder();
-                foreach (var file in files)
-                {
-                    sb.Append(Path.GetFileName(file) + ", ");
-                }
-                foreach (var directory in directories)
-                {
-                    sb.Append(Path.GetFileName(directory) + ", ");
-                }
-                response = sb.ToString();
+                response = fileAndDir(my_dir);
             }
             else if (message.StartsWith("in "))
             {
-                string name = message.Substring(3);
-                if (name == "...")
+                try
                 {
-                    my_dir = Directory.GetParent(my_dir).FullName;
+                    string name = message.Substring(3);
+                    if (name == "...")
+                    {
+                        my_dir = Directory.GetParent(my_dir).FullName;
+                    }
+                    else
+                    {
+                        my_dir = Path.Combine(my_dir, name);
+                    }
+                    response = fileAndDir(my_dir);
                 }
-                else
+                catch (Exception e)
                 {
-                    my_dir = Path.Combine(my_dir, name);
+                    response = e.Message;
                 }
-                string[] files = Directory.GetFiles(my_dir);
-                string[] directories = Directory.GetDirectories(my_dir);
-                StringBuilder sb = new StringBuilder();
-                foreach (var file in files)
-                {
-                    sb.Append(Path.GetFileName(file) + ", ");
-                }
-                foreach (var directory in directories)
-                {
-                    sb.Append(Path.GetFileName(directory) + ", ");
-                }
-                response = sb.ToString();
-
             }
             else
             {
@@ -100,11 +88,10 @@ public class Server
 
             /* ---------------------------------- Send ---------------------------------- */
             byte[] responseBytes = Encoding.UTF8.GetBytes(response);
-            // Encode the response message size
             byte[] responseSizeBytes = BitConverter.GetBytes(responseBytes.Length);
-            // Send the response message size
+
+            // Send the response message size and message
             socketKlienta.Send(responseSizeBytes, SocketFlags.None);
-            // Send the response message
             socketKlienta.Send(responseBytes, SocketFlags.None);
             try
             {
@@ -114,6 +101,27 @@ public class Server
             catch { }
 
         }
+    }
 
+
+    public static String fileAndDir(String my_dir)
+    {
+
+        string[] files = Directory.GetFiles(my_dir);
+        string[] directories = Directory.GetDirectories(my_dir);
+        StringBuilder sb = new StringBuilder();
+
+        sb.Append($"Current Directory: {my_dir}\n\nDirectories:\n");
+        foreach (var directory in directories)
+        {
+            sb.Append(Path.GetFileName(directory) + ", ");
+        }
+        sb.Append("\nFiles:\n");
+        foreach (var file in files)
+        {
+            sb.Append(Path.GetFileName(file) + ", ");
+        }
+        String response = sb.ToString();
+        return response;
     }
 }
