@@ -24,7 +24,8 @@ public class Client
         socket.Connect(localEndPoint);
 
         //Sending message to server in UTF8
-        string wiadomosc = "Wiadomość od klienta";
+        // read input from user
+        string wiadomosc = Console.ReadLine();
         byte[] wiadomoscBajty = Encoding.UTF8.GetBytes(wiadomosc);
         socket.Send(wiadomoscBajty, SocketFlags.None);
 

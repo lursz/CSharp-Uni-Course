@@ -31,7 +31,7 @@ public class Server
         int received = socketKlienta.Receive(bufor, SocketFlags.None);
         String wiadomoscKlienta = Encoding.UTF8.GetString(bufor, 0, received);
         Console.WriteLine(wiadomoscKlienta);
-        string odpowiedz = "odpowiedź serwera";
+        string odpowiedz = "Received: " + wiadomoscKlienta;
         var echoBytes = Encoding.UTF8.GetBytes(odpowiedz);
         socketKlienta.Send(echoBytes, 0);
         try
