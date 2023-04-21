@@ -3,63 +3,52 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace AssymetricPassword
 {
     public class Password
     {
 
-        public void Encrypt(string filename_a, string filename_b, string password)
+        // create salt form string
+        byte[] salt = Encoding.UTF8.GetBytes("CwuuJx/7");
+        byte[] initVector = Encoding.UTF8.GetBytes("uyZG5sl561Wo2ZTE");
+        int iterations = 5;
+
+
+        public byte[] Encrypt(byte[] input_data, string password)
         {
-            try
-            {
-                using (FileStream fileStreamIn = new FileStream(filename_a, FileMode.Open))
-                {
-                    byte[] key ={0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16,0x17, 0x18, 0x19, 0x20, 0x21, 0x21, 0x22, 0x23,0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x30, 0x31};
-                    using (Aes aes = Aes.Create())
-                    {
-                        aes.Key = key;
-                        using (FileStream fileStreamOut = new FileStream(filename_b, FileMode.Create))
-                        {
-                            using (CryptoStream cryptoStream = new CryptoStream(fileStreamOut, aes.CreateEncryptor(), CryptoStreamMode.Write))
-                            {
-                                fileStreamIn.CopyTo(cryptoStream);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            System.Console.WriteLine(salt.Length);
+            System.Console.WriteLine(initVector.Length); 
+            Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256);
+            Aes encAlg = Aes.Create();
+            encAlg.IV = initVector;
+            encAlg.Key = key.GetBytes(16);
+            MemoryStream encryptionStream = new MemoryStream();
+            CryptoStream encrypt = new CryptoStream(encryptionStream,
+                encAlg.CreateEncryptor(), CryptoStreamMode.Write);
+            encrypt.Write(input_data, 0, input_data.Length);
+            encrypt.FlushFinalBlock();
+            encrypt.Close();
+            key.Reset();
+            return encryptionStream.ToArray();
         }
 
+        public byte[] Decrypt(byte[] input_data, string password)
+        {   
 
-        public void Decrypt(string filename_a, string filename_b, string password)
-        {
-            try
-            {
-                using (FileStream fileStreamIn = new FileStream(filename_a, FileMode.Open))
-                {
-                    byte[] key ={0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16,0x17, 0x18, 0x19, 0x20, 0x21, 0x21, 0x22, 0x23,0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x30, 0x31};
-                    using (Aes aes = Aes.Create())
-                    {
-                        aes.Key = key;
-                        using (FileStream fileStreamOut = new FileStream(filename_b, FileMode.Create))
-                        {
-                            using (CryptoStream cryptoStream = new CryptoStream(fileStreamOut, aes.CreateDecryptor(), CryptoStreamMode.Write))
-                            {
-                                fileStreamIn.CopyTo(cryptoStream);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            Rfc2898DeriveBytes k1 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256);
+            Aes decAlg = Aes.Create();
+            decAlg.Key = k1.GetBytes(16);
+            decAlg.IV = initVector;
+            MemoryStream decryptionStreamBacking = new MemoryStream();
+            CryptoStream decrypt = new CryptoStream(
+                decryptionStreamBacking, decAlg.CreateDecryptor(), CryptoStreamMode.Write);
+            decrypt.Write(input_data, 0, input_data.Length);
+            decrypt.Flush();
+            decrypt.Close();
+            k1.Reset();
+            return decryptionStreamBacking.ToArray();
         }
     }
 }

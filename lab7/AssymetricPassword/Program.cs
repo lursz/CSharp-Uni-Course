@@ -1,4 +1,6 @@
-﻿using AssymetricPassword;
+﻿using System.ComponentModel;
+using System.Text;
+using AssymetricPassword;
 internal class Program
 {
     private static void Main(string[] args)
@@ -8,16 +10,22 @@ internal class Program
             Console.WriteLine("Error. Too few arguments.");
             return;
         }
-
         Password password = new Password();
 
         if (args[3] == "0")
         {
-            password.Encrypt(args[1], args[2], args[3]);
+            string file = File.ReadAllText(args[0]);
+            byte[] input_data = Encoding.UTF8.GetBytes(file);
+            byte[] encrypted = password.Encrypt(input_data, args[2]);
+            File.WriteAllBytes(args[1], encrypted);
+            
         }
         else if (args[3] == "1")
         {
-            password.Decrypt(args[1], args[2], args[3]);
+            byte [] file = File.ReadAllBytes(args[0]);
+            byte[] decrypted = password.Decrypt(file, args[2]);
+            File.WriteAllText(args[1], Encoding.UTF8.GetString(decrypted));
+
         }
         else
         {
