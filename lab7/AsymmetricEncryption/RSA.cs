@@ -7,7 +7,7 @@ namespace lab7
 {
     public class AsymmetricKey
     {
-        RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+        RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(4096);
         string filename_public;
         string filename_private;
         
@@ -26,7 +26,7 @@ namespace lab7
             System.IO.File.WriteAllText(filename_private, privateKey);
         }
 
-        public void cipherFile(string filename_a, string filename_b)
+        public void cipherFile(string filename_a, string filename_b, string filename_public = "publicKey.xml", string filename_private = "privateKey.xml")
         {
             Console.WriteLine("Crypting...");
             var publicKey = File.ReadAllText(filename_public);
@@ -36,23 +36,24 @@ namespace lab7
             byte[] inputBytes = File.ReadAllBytes(filename_a);
             byte[] encryptedBytes = rsa.Encrypt(inputBytes, false);
 
+
             File.WriteAllBytes(filename_b, encryptedBytes);
         }
 
-        public void decipherFile(string filename_a, string filename_b)
+        public void decipherFile(string filename_a, string filename_b, string filename_public = "publicKey.xml", string filename_private = "privateKey.xml")
         {
             Console.WriteLine("Decrypting...");
             var privateKey = File.ReadAllText(filename_private);
             var rsa = new RSACryptoServiceProvider();
             rsa.FromXmlString(privateKey);
 
-            byte[] inputBytes = File.ReadAllBytes(filename_b);
+            byte[] inputBytes = File.ReadAllBytes(filename_a);
             byte[] decryptedBytes = rsa.Decrypt(inputBytes, false);
 
-            File.WriteAllBytes(filename_a, decryptedBytes);
+            File.WriteAllBytes(filename_b, decryptedBytes);
         }
         /* ----------------------------------- ex3 ---------------------------------- */
-        public bool verifySignaturre(string filename_a, string filename_b)
+        public bool verifySignaturre(string filename_a, string filename_b, string filename_public = "publicKey.xml", string filename_private = "privateKey.xml")
         {
             Console.WriteLine("Verifying...");
             var publicKey = File.ReadAllText(filename_public);
@@ -67,7 +68,7 @@ namespace lab7
             return verified;
         }
 
-        public void generateSignature(string filename_a, string filename_b)
+        public void generateSignature(string filename_a, string filename_b,string filename_public = "publicKey.xml", string filename_private = "privateKey.xml")
         {
             Console.WriteLine("Generating signature...");
             var privateKey = File.ReadAllText(filename_private);

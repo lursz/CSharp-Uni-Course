@@ -25,7 +25,10 @@ internal class Program
                 {
                     cipher.generateSignature(args[1], args[2]);
                 }
-                cipher.verifySignaturre(args[1], args[2]);
+                else
+                {
+                    cipher.verifySignaturre(args[1], args[2]);
+                }
                 break;
             default:
                 Console.WriteLine("Wrong command");
