@@ -28,9 +28,12 @@ namespace lab8
                 if (values.Length != header.Count)
                     throw new Exception("Invalid CSV format");
 
+
                 // Loop over values
                 foreach (string value in values)
                 {
+                    bool isDouble = false;
+
                     // If empty
                     if (string.IsNullOrWhiteSpace(value))
                         row.Add(null);
@@ -38,12 +41,8 @@ namespace lab8
                     // Try to parse as double
                     else if (value.All(c => char.IsDigit(c) || c == '.'))
                         row.Add(Convert.ToDouble(double.Parse(value)));
-   
-                    // Try to parse as int
-                    else if (value.All(char.IsDigit))
-                        row.Add(int.Parse(value));
- 
-                    
+
+
 
                     // Try to parse as string
                     else
@@ -51,6 +50,35 @@ namespace lab8
                 }
                 data.Add(row);
             }
+
+            // Loop through columns of data, if whole column is int, parse it to int
+            // Column loop
+            for (int i = 0; i < header.Count; i++)
+            {
+                bool isIntColumn = true;
+                int intValue = 0;
+
+                // Int check loop
+                foreach (List<object>? row in data)
+                    if (row != null && !int.TryParse(row[i]?.ToString(), out intValue))
+                    {
+                        isIntColumn = false;
+                        break;
+                    }
+                
+
+                // Int parse loop
+                if (isIntColumn)
+                {
+                    for (int j = 0; j < data.Count; j++)
+                        if (data[j] != null)
+                        {
+                            data[j][i] = int.Parse(data[j][i].ToString());
+                        }
+                }
+            }
+
+
             // Print
             System.Console.WriteLine("Header: " + string.Join(" ", header));
             foreach (List<object> row in data)
@@ -104,7 +132,7 @@ namespace lab8
                 // If nullable
                 if (!column.Value.Item2)
                     create_command += " NOT NULL";
-                create_command += ", ";
+                create_command += ",";
             }
             create_command = create_command.TrimEnd(',') + ")";
 
@@ -120,9 +148,9 @@ namespace lab8
         {
             // Insert data
             SqliteCommand insertCmd = connection.CreateCommand();
-            string insert_command = "INSERT INTO " + tableName + " VALUES (";
             foreach (List<object>? row in data)
             {
+                string insert_command = "INSERT INTO " + tableName + " VALUES (";
                 foreach (object? value in row)
                 {
                     if (value == null)
@@ -133,9 +161,9 @@ namespace lab8
                         insert_command += $"{value}, ";
                 }
                 insert_command = insert_command.TrimEnd(',', ' ') + ")";
+                System.Console.WriteLine(insert_command);
                 insertCmd.CommandText = insert_command;
                 insertCmd.ExecuteNonQuery();
-                System.Console.WriteLine(insert_command);
             }
         }
 
@@ -184,3 +212,37 @@ namespace lab8
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+// // If all are floats parse to float
+//                     else if (values.All(val => float.TryParse(val, out float floatvalue)))
+//                         // parse value to float
+//                         row.Add(float.Parse(value));
+
+//                     // If all are ints parse to int
+//                     else if (values.All(val => int.TryParse(val, out int intValue)))
+//                         row.Add(int.Parse(value));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
