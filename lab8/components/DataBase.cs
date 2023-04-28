@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
@@ -33,12 +34,17 @@ namespace lab8
                     // If empty
                     if (string.IsNullOrWhiteSpace(value))
                         row.Add(null);
+
+                    // Try to parse as double
+                    else if (value.All(c => char.IsDigit(c) || c == '.'))
+                        row.Add(Convert.ToDouble(double.Parse(value)));
+   
                     // Try to parse as int
-                    if (int.TryParse(value, out int intValue))
-                        row.Add(intValue);
-                    // Try to parse as float
-                    else if (float.TryParse(value, out float floatValue))
-                        row.Add(floatValue);
+                    else if (value.All(char.IsDigit))
+                        row.Add(int.Parse(value));
+ 
+                    
+
                     // Try to parse as string
                     else
                         row.Add(value);
@@ -46,9 +52,9 @@ namespace lab8
                 data.Add(row);
             }
             // Print
-            System.Console.WriteLine("Header: " + string.Join(", ", header));
+            System.Console.WriteLine("Header: " + string.Join(" ", header));
             foreach (List<object> row in data)
-                System.Console.WriteLine(string.Join(", ", row));
+                System.Console.WriteLine(string.Join("| ", row));
 
             return (data, header);
         }
@@ -75,7 +81,6 @@ namespace lab8
                 else
                     System.Console.WriteLine("Column " + header + " has multiple types");
 
-                // TODO solve multiple types
                 // print
                 System.Console.WriteLine("Column " + header + " is of type " + type + " and can be null: " + can_be_null);
             }
@@ -86,9 +91,9 @@ namespace lab8
         public void createTable(Dictionary<string, Tuple<Type, bool>> columns, string tableName, SqliteConnection connection)
         {
             // Delete table if exists
-                SqliteCommand delTableCmd = connection.CreateCommand();
-                delTableCmd.CommandText = "DROP TABLE IF EXISTS " + tableName;
-                delTableCmd.ExecuteNonQuery();
+            SqliteCommand delTableCmd = connection.CreateCommand();
+            delTableCmd.CommandText = "DROP TABLE IF EXISTS " + tableName;
+            delTableCmd.ExecuteNonQuery();
 
             // Create table
             SqliteCommand createTableCmd = connection.CreateCommand();
@@ -107,11 +112,11 @@ namespace lab8
             System.Console.WriteLine(create_command);
             createTableCmd.CommandText = create_command;
             createTableCmd.ExecuteNonQuery();
-            
+
         }
 
         /* ------------------------------- insertData ------------------------------- */
-        public void insertData (List<List<object>?> data, List<string> headers, string tableName, SqliteConnection connection)
+        public void insertData(List<List<object>?> data, List<string> headers, string tableName, SqliteConnection connection)
         {
             // Insert data
             SqliteCommand insertCmd = connection.CreateCommand();
@@ -135,7 +140,7 @@ namespace lab8
         }
 
         /* ------------------------------- printTable ------------------------------- */
-        public void printTable (string tableName, SqliteConnection connection)
+        public void printTable(string tableName, SqliteConnection connection)
         {
             // Print table
             SqliteCommand printCmd = connection.CreateCommand();
@@ -148,7 +153,7 @@ namespace lab8
                 System.Console.WriteLine();
             }
         }
- 
+
 
 
 
