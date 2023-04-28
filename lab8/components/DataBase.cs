@@ -32,8 +32,6 @@ namespace lab8
                 // Loop over values
                 foreach (string value in values)
                 {
-                    bool isDouble = false;
-
                     // If empty
                     if (string.IsNullOrWhiteSpace(value))
                         row.Add(null);
@@ -65,8 +63,6 @@ namespace lab8
                         isIntColumn = false;
                         break;
                     }
-                
-
                 // Int parse loop
                 if (isIntColumn)
                 {
@@ -82,7 +78,7 @@ namespace lab8
             // Print
             System.Console.WriteLine("Header: " + string.Join(" ", header));
             foreach (List<object> row in data)
-                System.Console.WriteLine(string.Join("| ", row));
+                System.Console.WriteLine(string.Join(" | ", row));
 
             return (data, header);
         }
@@ -174,10 +170,17 @@ namespace lab8
             SqliteCommand printCmd = connection.CreateCommand();
             printCmd.CommandText = "SELECT * FROM " + tableName;
             SqliteDataReader reader = printCmd.ExecuteReader();
+
+            // Header
+            for (int i = 0; i < reader.FieldCount; i++)
+                System.Console.Write(reader.GetName(i) + " ");
+            System.Console.WriteLine("\n---------------------------------");
+
+            // Records
             while (reader.Read())
             {
                 for (int i = 0; i < reader.FieldCount; i++)
-                    System.Console.Write(reader.GetValue(i) + " ");
+                    System.Console.Write(reader.GetValue(i) + " | ");
                 System.Console.WriteLine();
             }
         }
@@ -212,37 +215,4 @@ namespace lab8
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-// // If all are floats parse to float
-//                     else if (values.All(val => float.TryParse(val, out float floatvalue)))
-//                         // parse value to float
-//                         row.Add(float.Parse(value));
-
-//                     // If all are ints parse to int
-//                     else if (values.All(val => int.TryParse(val, out int intValue)))
-//                         row.Add(int.Parse(value));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
