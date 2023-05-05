@@ -11,7 +11,9 @@ namespace lab9
     public class ImageProcessor
     {
 
-        /* ------------------------------- Grey scale ------------------------------- */
+        /* -------------------------------------------------------------------------- */
+        /*                                 Grey scale                                 */
+        /* -------------------------------------------------------------------------- */
         public void toGreyscale(string path)
         {
             using (Image<Rgb24> image = Image.Load<Rgb24>(path))
@@ -29,13 +31,14 @@ namespace lab9
 
                         clone[a, b] = new Rgb24((byte)((R + G + B) / 3), (byte)((R + G + B) / 3), (byte)((R + G + B) / 3));
                     }
-                clone.Save("greyscale.png");
+                clone.Save("output/greyscale.png");
             }
         }
 
-
-        /* --------------------------------- Filters -------------------------------- */
-        public void medianFilter(string path, int frame_width, int frame_hight)
+        /* -------------------------------------------------------------------------- */
+        /*                            Median, Min, Max, Avg                           */
+        /* -------------------------------------------------------------------------- */
+        public void Transform(string path, int frame_width, int frame_hight)
         {
             if (frame_width % 2 == 0 || frame_hight % 2 == 0)
                 throw new ArgumentException("Width and height must be odd numbers.");
@@ -43,141 +46,204 @@ namespace lab9
             // Load the image as Image<Rgba32>
             using (var image = Image.Load<Rgba32>(path))
             {
-                using (var result = new Image<Rgba32>(image.Width, image.Height))
+                using (var resultMedian = new Image<Rgba32>(image.Width, image.Height))
                 {
-                    for (int a = 0; a < image.Width; a++)
+                    using (var resultMax = new Image<Rgba32>(image.Width, image.Height))
                     {
-                        for (int b = 0; b < image.Height; b++)
+                        using (var resultMin = new Image<Rgba32>(image.Width, image.Height))
                         {
-                            List<Rgba32> colors_of_neighbouring_pixels = getColorsOfNeighbouringPixels(image, a, b, frame_width, frame_hight);
-
-
-                            // Sort the list by brightness
-                            colors_of_neighbouring_pixels.Sort((a, b) => ((a.R + a.G + a.B) / 3.0).CompareTo((b.R + b.G + b.B) / 3.0));
-                            // Median
-                            var median = colors_of_neighbouring_pixels[colors_of_neighbouring_pixels.Count / 2];
-                            result[a, b] = median;
-                        }
-                    }
-                    // Save the result image to a new file
-                    result.Save("median-filtered.png");
-                }
-            }
-        }
-
-        public void maxMinAvgFilter(string path, int frame_width, int frame_hight)
-        {
-            if (frame_width % 2 == 0 || frame_hight % 2 == 0)
-                throw new ArgumentException("Width and height must be odd numbers.");
-
-            using (var image = Image.Load<Rgba32>(path))
-            {
-                // save 3 pictures, one for max, one for min, one for avg
-                using (var result_max = new Image<Rgba32>(image.Width, image.Height))
-                {
-                    using (var result_min = new Image<Rgba32>(image.Width, image.Height))
-                    {
-                        using (var result_avg = new Image<Rgba32>(image.Width, image.Height))
-                        {
-                            for (int a = 0; a < image.Width; a++)
+                            using (var resultAvg = new Image<Rgba32>(image.Width, image.Height))
                             {
-                                for (int b = 0; b < image.Height; b++)
+                                // Parallel for loop
+                                Parallel.For(0, image.Width, x =>
                                 {
-                                    List<Rgba32> colors_of_neighbouring_pixels = getColorsOfNeighbouringPixels(image, a, b, frame_width, frame_hight);
-
-                                    // Sort the list by brightness
-                                    colors_of_neighbouring_pixels.Sort((a, b) => ((a.R + a.G + a.B) / 3.0).CompareTo((b.R + b.G + b.B) / 3.0));
-
-                                    // Max
-                                    var max = colors_of_neighbouring_pixels[colors_of_neighbouring_pixels.Count - 1];
-                                    result_max[a, b] = max;
-
-                                    // Min
-                                    var min = colors_of_neighbouring_pixels[0];
-                                    result_min[a, b] = min;
-
-                                    // Avg
-                                    int sumR = 0;
-                                    int sumG = 0;
-                                    int sumB = 0;
-                                    foreach (var color in colors_of_neighbouring_pixels)
+                                    for (int y = 0; y < image.Height; y++)
                                     {
-                                        sumR += color.R;
-                                        sumG += color.G;
-                                        sumB += color.B;
+                                        resultMedian[x, y] = medianPixel(image, x, y, frame_width, frame_hight);
+                                        resultMax[x, y] = maxPixel(image, x, y, frame_width, frame_hight);
+                                        resultMin[x, y] = minPixel(image, x, y, frame_width, frame_hight);
+                                        resultAvg[x, y] = AvgPixel(image, x, y, frame_width, frame_hight);
                                     }
-                                    result_avg[a, b] = new Rgba32((byte)(sumR / colors_of_neighbouring_pixels.Count), (byte)(sumG / colors_of_neighbouring_pixels.Count), (byte)(sumB / colors_of_neighbouring_pixels.Count));
-                                }
+                                });
+                                resultAvg.Save("output/avg.png");
                             }
-                            // Save the result image to a new file
-                            result_max.Save("max-filtered.png");
-                            result_min.Save("min-filtered.png");
-                            result_avg.Save("avg-filtered.png");
+                            resultMin.Save("output/min.png");
                         }
+                        resultMax.Save("output/max.png");
                     }
+                    resultMedian.Save("output/median.png");
                 }
+
+
             }
         }
-        private List<Rgba32> getColorsOfNeighbouringPixels(Image<Rgba32> image, int x, int y, int frame_width, int frame_hight)
-        {
-            var colors_of_neighbouring_pixels = new List<Rgba32>();
 
-            // Loop through the frame around the current pixel
-            for (int i = -frame_width / 2; i <= frame_width / 2; i++)
-            {
-                for (int j = -frame_hight / 2; j <= frame_hight / 2; j++)
+        /* ------------------------------- Median filter ------------------------------- */
+        private Rgba32 medianPixel(Image<Rgba32> image, int x, int y, int frame_width, int frame_hight)
+        {
+            List<byte> R = new List<byte>();
+            List<byte> G = new List<byte>();
+            List<byte> B = new List<byte>();
+
+            // Get the pixels in the frame
+            for (int a = x - frame_width / 2; a <= x + frame_width / 2; a++)
+                for (int b = y - frame_hight / 2; b <= y + frame_hight / 2; b++)
                 {
-                    // Coordinates of the neighboring pixel
-                    int nx = x + i;
-                    int ny = y + j;
-
-                    // Coordinates within the image bounds?
-                    if (nx >= 0 && nx < image.Width && ny >= 0 && ny < image.Height)
+                    // Check if the pixel is in the image
+                    if (a >= 0 && a < image.Width && b >= 0 && b < image.Height)
                     {
-                        // Color of the neighboring pixel
-                        var neighbor = image[nx, ny];
-                        colors_of_neighbouring_pixels.Add(neighbor);
+                        R.Add(image[a, b].R);
+                        G.Add(image[a, b].G);
+                        B.Add(image[a, b].B);
                     }
                 }
-            }
-            return colors_of_neighbouring_pixels;
+
+            // Sort the lists
+            R.Sort();
+            G.Sort();
+            B.Sort();
+
+            return new Rgba32(R[R.Count / 2], G[G.Count / 2], B[B.Count / 2]);
+        }
+
+        /* ------------------------------- Min filter ------------------------------- */
+        private Rgba32 minPixel(Image<Rgba32> image, int x, int y, int frame_width, int frame_hight)
+        {
+            List<byte> R = new List<byte>();
+            List<byte> G = new List<byte>();
+            List<byte> B = new List<byte>();
+
+            // Get the pixels in the frame
+            for (int a = x - frame_width / 2; a <= x + frame_width / 2; a++)
+                for (int b = y - frame_hight / 2; b <= y + frame_hight / 2; b++)
+                {
+                    // Check if the pixel is in the image
+                    if (a >= 0 && a < image.Width && b >= 0 && b < image.Height)
+                    {
+                        R.Add(image[a, b].R);
+                        G.Add(image[a, b].G);
+                        B.Add(image[a, b].B);
+                    }
+                }
+
+            // Sort the lists
+            R.Sort();
+            G.Sort();
+            B.Sort();
+
+
+            return new Rgba32(R[0], G[0], B[0]);
+        }
+
+        /* ------------------------------- Max filter ------------------------------- */
+        private Rgba32 maxPixel(Image<Rgba32> image, int x, int y, int frame_width, int frame_hight)
+        {
+            List<byte> R = new List<byte>();
+            List<byte> G = new List<byte>();
+            List<byte> B = new List<byte>();
+
+            // Get the pixels in the frame
+            for (int a = x - frame_width / 2; a <= x + frame_width / 2; a++)
+                for (int b = y - frame_hight / 2; b <= y + frame_hight / 2; b++)
+                {
+                    // Check if the pixel is in the image
+                    if (a >= 0 && a < image.Width && b >= 0 && b < image.Height)
+                    {
+                        R.Add(image[a, b].R);
+                        G.Add(image[a, b].G);
+                        B.Add(image[a, b].B);
+                    }
+                }
+
+            // Sort the lists
+            R.Sort();
+            G.Sort();
+            B.Sort();
+
+            return new Rgba32(R[R.Count - 1], G[G.Count - 1], B[B.Count - 1]);
+
+        }
+
+        /* ------------------------------- Avg Filter ------------------------------- */
+        private Rgba32 AvgPixel(Image<Rgba32> image, int x, int y, int frame_width, int frame_hight)
+        {
+            List<int> R = new List<int>();
+            List<int> G = new List<int>();
+            List<int> B = new List<int>();
+
+            // Get the pixels in the frame
+            for (int a = x - frame_width / 2; a <= x + frame_width / 2; a++)
+                for (int b = y - frame_hight / 2; b <= y + frame_hight / 2; b++)
+                {
+                    // Check if the pixel is in the image
+                    if (a >= 0 && a < image.Width && b >= 0 && b < image.Height)
+                    {
+                        R.Add(image[a, b].R);
+                        G.Add(image[a, b].G);
+                        B.Add(image[a, b].B);
+                    }
+                }
+
+
+            // Save to variables
+            return new Rgba32((byte)(R.Average()), (byte)(G.Average()), (byte)(B.Average()));
         }
 
 
-        /* --------------------------- Convolution filter --------------------------- */
-        public void convolutionFilter(string path, int[,] kernel)
+
+        /* -------------------------------------------------------------------------- */
+        /*                             Convolution filter                             */
+        /* -------------------------------------------------------------------------- */
+        public void convolutionTransform (string path, int [,] kernel)
         {
-            // Load the image as Image<Rgba32>
+            // Load the image
             using (var image = Image.Load<Rgba32>(path))
             {
+                // Create a new image
                 using (var result = new Image<Rgba32>(image.Width, image.Height))
                 {
-                    for (int a = 0; a < image.Width; a++)
+                    // Parallel for loop
+                    Parallel.For(0, image.Width, x =>
                     {
-                        for (int b = 0; b < image.Height; b++)
+                        for (int y = 0; y < image.Height; y++)
                         {
-                            List<Rgba32> colors_of_neighbouring_pixels = getColorsOfNeighbouringPixels(image, a, b, kernel.GetLength(0), kernel.GetLength(1));
-
-                            // Apply the kernel
-                            int sumR = 0;
-                            int sumG = 0;
-                            int sumB = 0;
-                            for (int i = 0; i < kernel.GetLength(0); i++)
-                            {
-                                for (int j = 0; j < kernel.GetLength(1); j++)
-                                {
-                                    sumR += colors_of_neighbouring_pixels[i * kernel.GetLength(0) + j].R * kernel[i, j];
-                                    sumG += colors_of_neighbouring_pixels[i * kernel.GetLength(0) + j].G * kernel[i, j];
-                                    sumB += colors_of_neighbouring_pixels[i * kernel.GetLength(0) + j].B * kernel[i, j];
-                                }
-                            }
-                            result[a, b] = new Rgba32((byte)(sumR / kernel.GetLength(0) / kernel.GetLength(1)), (byte)(sumG / kernel.GetLength(0) / kernel.GetLength(1)), (byte)(sumB / kernel.GetLength(0) / kernel.GetLength(1)));
+                            result[x, y] = convolutionPixel(image, x, y, kernel);
                         }
-                    }
-                    // Save the result image to a new file
-                    result.Save("convolution-filtered.png");
+                    });
+                    result.Save("output/convolution.png");
                 }
             }
         }
+        private Rgba32 convolutionPixel(Image<Rgba32> image, int x, int y, int[,] kernel)
+        {
+            int R = 0;
+            int G = 0;
+            int B = 0;
+
+            // Get the pixels in the frame
+            for (int a = x - kernel.GetLength(0) / 2; a <= x + kernel.GetLength(0) / 2; a++)
+                for (int b = y - kernel.GetLength(1) / 2; b <= y + kernel.GetLength(1) / 2; b++)
+                {
+                    // Check if the pixel is in the image
+                    if (a >= 0 && a < image.Width && b >= 0 && b < image.Height)
+                    {
+                        R += image[a, b].R * kernel[a - x + kernel.GetLength(0) / 2, b - y + kernel.GetLength(1) / 2];
+                        G += image[a, b].G * kernel[a - x + kernel.GetLength(0) / 2, b - y + kernel.GetLength(1) / 2];
+                        B += image[a, b].B * kernel[a - x + kernel.GetLength(0) / 2, b - y + kernel.GetLength(1) / 2];
+                    }
+                }
+
+            // Check if the value is in the range
+            if (R < 0) R = 0;
+            if (R > 255) R = 255;
+            if (G < 0) G = 0;
+            if (G > 255) G = 255;
+            if (B < 0) B = 0;
+            if (B > 255) B = 255;
+
+            return new Rgba32((byte)(R), (byte)(G), (byte)(B));
+        }
+
+
     }
 }
