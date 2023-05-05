@@ -5,8 +5,10 @@ class Program
     {
         ImageProcessor processor = new ImageProcessor();
         processor.toGreyscale("test.png");
-        processor.Transform("test.png", 9, 9);
-        processor.convolutionTransform("test.png", new int[,] { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } });
+        processor.Transform("test.png", 11, 11);
+        processor.convolutionTransform("test.png", new int[,] { { -1, 0, 1 }, { -1, 0, 1 }, { -1, 0, 1 } });
+        // processor.convolutionTransform("test.png", new int[,] { { 1, 1, 1 }, { 0, 0, 0 }, { -1, -1, -1 } });
+
 
     }
 

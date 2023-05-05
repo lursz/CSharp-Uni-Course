@@ -16,23 +16,24 @@ namespace lab9
         /* -------------------------------------------------------------------------- */
         public void toGreyscale(string path)
         {
-            using (Image<Rgb24> image = Image.Load<Rgb24>(path))
-            {
-                Image<Rgb24> clone = image.Clone();
+            System.Console.WriteLine("Converting to greyscale...");
+            using Image<Rgb24> image = Image.Load<Rgb24>(path);
 
-                // Using (R + G + B) / 3
-                for (int a = 0; a < image.Width; a++)
-                    for (int b = 0; b < image.Height; b++)
-                    {
-                        // Get the pixel color
-                        byte R = image[a, b].R;
-                        byte G = image[a, b].G;
-                        byte B = image[a, b].B;
+            Image<Rgb24> clone = image.Clone();
 
-                        clone[a, b] = new Rgb24((byte)((R + G + B) / 3), (byte)((R + G + B) / 3), (byte)((R + G + B) / 3));
-                    }
-                clone.Save("output/greyscale.png");
-            }
+            // Using (R + G + B) / 3
+            for (int a = 0; a < image.Width; a++)
+                for (int b = 0; b < image.Height; b++)
+                {
+                    // Get the pixel color
+                    byte R = image[a, b].R;
+                    byte G = image[a, b].G;
+                    byte B = image[a, b].B;
+
+                    clone[a, b] = new Rgb24((byte)((R + G + B) / 3), (byte)((R + G + B) / 3), (byte)((R + G + B) / 3));
+                }
+            clone.Save("output/greyscale.png");
+
         }
 
         /* -------------------------------------------------------------------------- */
@@ -40,39 +41,34 @@ namespace lab9
         /* -------------------------------------------------------------------------- */
         public void Transform(string path, int frame_width, int frame_hight)
         {
+            System.Console.WriteLine("Transforming...");
             if (frame_width % 2 == 0 || frame_hight % 2 == 0)
                 throw new ArgumentException("Width and height must be odd numbers.");
 
             // Load the image as Image<Rgba32>
             using (var image = Image.Load<Rgba32>(path))
             {
-                using (var resultMedian = new Image<Rgba32>(image.Width, image.Height))
+                using var resultMedian = new Image<Rgba32>(image.Width, image.Height);
+                using var resultMax = new Image<Rgba32>(image.Width, image.Height);
+                using var resultMin = new Image<Rgba32>(image.Width, image.Height);
+                using var resultAvg = new Image<Rgba32>(image.Width, image.Height);
+
+                // Parallel for loop
+                Parallel.For(0, image.Width, x =>
                 {
-                    using (var resultMax = new Image<Rgba32>(image.Width, image.Height))
+                    Parallel.For(0, image.Height, y =>
                     {
-                        using (var resultMin = new Image<Rgba32>(image.Width, image.Height))
-                        {
-                            using (var resultAvg = new Image<Rgba32>(image.Width, image.Height))
-                            {
-                                // Parallel for loop
-                                Parallel.For(0, image.Width, x =>
-                                {
-                                    for (int y = 0; y < image.Height; y++)
-                                    {
-                                        resultMedian[x, y] = medianPixel(image, x, y, frame_width, frame_hight);
-                                        resultMax[x, y] = maxPixel(image, x, y, frame_width, frame_hight);
-                                        resultMin[x, y] = minPixel(image, x, y, frame_width, frame_hight);
-                                        resultAvg[x, y] = AvgPixel(image, x, y, frame_width, frame_hight);
-                                    }
-                                });
-                                resultAvg.Save("output/avg.png");
-                            }
-                            resultMin.Save("output/min.png");
-                        }
-                        resultMax.Save("output/max.png");
-                    }
-                    resultMedian.Save("output/median.png");
-                }
+                        resultMedian[x, y] = medianPixel(image, x, y, frame_width, frame_hight);
+                        resultMax[x, y] = maxPixel(image, x, y, frame_width, frame_hight);
+                        resultMin[x, y] = minPixel(image, x, y, frame_width, frame_hight);
+                        resultAvg[x, y] = avgPixel(image, x, y, frame_width, frame_hight);
+                    });
+                });
+                resultAvg.Save("output/avg.png");
+                resultMin.Save("output/min.png");
+                resultMax.Save("output/max.png");
+                resultMedian.Save("output/median.png");
+
 
 
             }
@@ -165,7 +161,7 @@ namespace lab9
         }
 
         /* ------------------------------- Avg Filter ------------------------------- */
-        private Rgba32 AvgPixel(Image<Rgba32> image, int x, int y, int frame_width, int frame_hight)
+        private Rgba32 avgPixel(Image<Rgba32> image, int x, int y, int frame_width, int frame_hight)
         {
             List<int> R = new List<int>();
             List<int> G = new List<int>();
@@ -194,25 +190,25 @@ namespace lab9
         /* -------------------------------------------------------------------------- */
         /*                             Convolution filter                             */
         /* -------------------------------------------------------------------------- */
-        public void convolutionTransform (string path, int [,] kernel)
+        public void convolutionTransform(string path, int[,] kernel)
         {
+            System.Console.WriteLine("Convolution transform");
             // Load the image
-            using (var image = Image.Load<Rgba32>(path))
+            using var image = Image.Load<Rgba32>(path);
+
+            // Create a new image
+            using (var result = new Image<Rgba32>(image.Width, image.Height))
             {
-                // Create a new image
-                using (var result = new Image<Rgba32>(image.Width, image.Height))
+                for (int x = 0; x < image.Width; x++)
                 {
-                    // Parallel for loop
-                    Parallel.For(0, image.Width, x =>
+                    for (int y = 0; y < image.Height; y++)
                     {
-                        for (int y = 0; y < image.Height; y++)
-                        {
-                            result[x, y] = convolutionPixel(image, x, y, kernel);
-                        }
-                    });
-                    result.Save("output/convolution.png");
+                        result[x, y] = convolutionPixel(image, x, y, kernel);
+                    }
                 }
+                result.Save("output/convolution.png");
             }
+
         }
         private Rgba32 convolutionPixel(Image<Rgba32> image, int x, int y, int[,] kernel)
         {
@@ -224,7 +220,7 @@ namespace lab9
             for (int a = x - kernel.GetLength(0) / 2; a <= x + kernel.GetLength(0) / 2; a++)
                 for (int b = y - kernel.GetLength(1) / 2; b <= y + kernel.GetLength(1) / 2; b++)
                 {
-                    // Check if the pixel is in the image
+                    // Matrix operations
                     if (a >= 0 && a < image.Width && b >= 0 && b < image.Height)
                     {
                         R += image[a, b].R * kernel[a - x + kernel.GetLength(0) / 2, b - y + kernel.GetLength(1) / 2];
