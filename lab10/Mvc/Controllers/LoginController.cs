@@ -161,10 +161,9 @@ public class LoginController : Controller
     {
         ViewData["Username"] = HttpContext.Session.GetString("Username");
 
-        if (ViewData["Username"] == null)
+        if (ViewData["Username"] is null)
         {
-            ViewData["Message"] = "You must be logged in to add data";
-            return View();
+            return RedirectToAction("Login");
         }
 
         using (var connection = new SqliteConnection("Data Source=" + data_base_name))
@@ -196,9 +195,12 @@ public class LoginController : Controller
     [Route("/data")]
     public IActionResult Data(IFormCollection form)
     {
-        if (form is null)
-            return View();
+        ViewData["Username"] = HttpContext.Session.GetString("Username");
 
+        if (ViewData["Username"] is null)
+        {
+            return RedirectToAction("Login");
+        }
 
         using (var connection = new SqliteConnection("Data Source=" + data_base_name))
 
