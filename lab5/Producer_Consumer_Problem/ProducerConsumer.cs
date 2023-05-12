@@ -14,7 +14,7 @@ namespace lab5
         public Thread Thread = null;
         public int sleepTime { get; set; }
 
-        public ProducerConsumer(int number_, List<int> data_, int sleepTime_)
+        protected ProducerConsumer(int number_, List<int> data_, int sleepTime_)
         {
             this.number = number_;
             this.data = data_;
@@ -85,7 +85,7 @@ namespace lab5
             lock (data)
             {
                 if (data.Count == 0) return;
-                consumed.Add(data[data.Count - 1]);
+                consumed.Add(data[^1]);
                 data.RemoveAt(data.Count - 1);
             }
         }
