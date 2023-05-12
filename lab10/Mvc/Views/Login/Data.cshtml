@@ -9,7 +9,7 @@
 </form>
 
 <ul>
-    @foreach (String item in ViewData["DataList"] as List<string>)
+    @foreach (String item in @ViewData["DataList"] as List<string>)
     {
         <li>@item</li>
     }

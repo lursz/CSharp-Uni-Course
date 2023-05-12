@@ -60,6 +60,7 @@ public class LoginController : Controller
             command.CommandText = "SELECT * FROM Users WHERE Username = @Username AND Password = @Password;";
             command.Parameters.AddWithValue("@Username", form["username"].ToString());
             command.Parameters.AddWithValue("@Password", MD5Hash(form["password"].ToString()));
+            System.Console.WriteLine(MD5Hash(form["password"].ToString()));
 
             var reader = command.ExecuteReader();
             if (reader.Read())
@@ -140,8 +141,14 @@ public class LoginController : Controller
     {
         using (var md5 = MD5.Create())
         {
-            var result = md5.ComputeHash(System.Text.Encoding.ASCII.GetBytes(input));
-            return System.Text.Encoding.ASCII.GetString(result);
+            byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+            var sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("X2"));
+            }
+            return sb.ToString();
         }
     }
 
@@ -232,17 +239,3 @@ public class LoginController : Controller
 
 
 
-    // private string MD5Hash1(string input)
-    // {
-    //     using (var md5 = MD5.Create())
-    //     {
-    //         byte[] inputBytes = Encoding.ASCII.GetBytes(input);
-    //         byte[] hashBytes = md5.ComputeHash(inputBytes);
-    //         var sb = new StringBuilder();
-    //         for (int i = 0; i < hashBytes.Length; i++)
-    //         {
-    //             sb.Append(hashBytes[i].ToString("X2"));
-    //         }
-    //         return sb.ToString();
-    //     }
-    // }

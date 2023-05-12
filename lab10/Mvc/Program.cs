@@ -1,13 +1,13 @@
 using Microsoft.Data.Sqlite;
 // dotnet add package Microsoft.EntityFrameworkCore.Sqlite && dotnet new mvc -o Mvc && dotnet dev-certs https --trust
-/* -------------------------------------------------------------------------- */
-/*                                  DataBase                                  */
-/* -------------------------------------------------------------------------- */
 
 internal class Program
 {
     private static void Main(string[] args)
     {
+        /* -------------------------------------------------------------------------- */
+        /*                                  DataBase                                  */
+        /* -------------------------------------------------------------------------- */
         var connectionStringBuilder = new SqliteConnectionStringBuilder();
         connectionStringBuilder.DataSource = "db.db";
 
@@ -23,7 +23,7 @@ internal class Program
         // string dataTable = "CREATE TABLE IF NOT EXISTS Data (id INTEGER PRIMARY KEY AUTOINCREMENT, Content TEXT NOT NULL, UserId INTEGER NOT NULL REFERENCES Users(id));";
         Command.CommandText = dataTable;
         Command.ExecuteNonQuery();
-    
+
         connection.Close();
 
 
@@ -82,7 +82,6 @@ internal class Program
                 //Re-execute the request so the user gets the error page
                 string originalPath = ctx.Request.Path.Value ?? "";
                 ctx.Items["originalPath"] = originalPath;
-                Console.WriteLine("Check");
                 ctx.Request.Path = "/login/";
                 ctx.Response.Redirect("/login/");
                 await next();
