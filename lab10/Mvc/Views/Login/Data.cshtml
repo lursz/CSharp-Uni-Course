@@ -8,6 +8,13 @@
     <input type="submit" value="Submit" asp-page-handler="Submit"/>
 </form>
 
+<ul>
+    @foreach (String item in ViewData["DataList"] as List<string>)
+    {
+        <li>@item</li>
+    }
+</ul>
+
 
 
 

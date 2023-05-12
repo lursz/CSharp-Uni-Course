@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Mvc.Models;
@@ -9,6 +10,7 @@ namespace Mvc.Controllers;
 //[Route("/")]
 public class LoginController : Controller
 {
+    private readonly string data_base_name = "db.db";
     private readonly ILogger<LoginController> _logger;
 
     public LoginController(ILogger<LoginController> logger)
@@ -48,7 +50,7 @@ public class LoginController : Controller
         if (form is null)
             return View();
 
-        using (var connection = new SqliteConnection("Data Source=db.db"))
+        using (var connection = new SqliteConnection("Data Source=" + data_base_name))
         {
             String username = form["username"].ToString();
             String password = form["password"].ToString();
@@ -57,7 +59,8 @@ public class LoginController : Controller
             var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM Users WHERE Username = @Username AND Password = @Password;";
             command.Parameters.AddWithValue("@Username", form["username"].ToString());
-            command.Parameters.AddWithValue("@Password", form["password"].ToString());
+            command.Parameters.AddWithValue("@Password", MD5Hash(form["password"].ToString()));
+
             var reader = command.ExecuteReader();
             if (reader.Read())
             {
@@ -89,7 +92,8 @@ public class LoginController : Controller
         if (form is null)
             return View();
 
-        using (var connection = new SqliteConnection("Data Source=db.db"))
+        using (var connection = new SqliteConnection("Data Source=" + data_base_name))
+
         {
 
             String username = form["username"].ToString();
@@ -120,8 +124,7 @@ public class LoginController : Controller
             var command = connection.CreateCommand();
             command.CommandText = "INSERT INTO Users (Username, Password) VALUES (@Username, @Password);";
             command.Parameters.AddWithValue("@Username", username);
-            command.Parameters.AddWithValue("@Password", password);
-            // command.Parameters.AddWithValue("@Password", MD5Encryption(password));
+            command.Parameters.AddWithValue("@Password", MD5Hash(password));
 
             command.ExecuteNonQuery();
 
@@ -130,27 +133,58 @@ public class LoginController : Controller
 
         return View();
     }
-    
-    
 
-    private string MD5Encryption(string password)
+
+
+    private string MD5Hash(string input)
     {
         using (var md5 = MD5.Create())
         {
-            var result = md5.ComputeHash(System.Text.Encoding.ASCII.GetBytes(password));
+            var result = md5.ComputeHash(System.Text.Encoding.ASCII.GetBytes(input));
             return System.Text.Encoding.ASCII.GetString(result);
         }
     }
 
 
-    /* -------------------------------- Add data -------------------------------- */
+
+
+    /* -------------------------------- View data ------------------------------- */
     [Route("/data")]
     public IActionResult Data()
     {
         ViewData["Username"] = HttpContext.Session.GetString("Username");
+
+        if (ViewData["Username"] == null)
+        {
+            ViewData["Message"] = "You must be logged in to add data";
+            return View();
+        }
+
+        using (var connection = new SqliteConnection("Data Source=" + data_base_name))
+
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT * FROM Data WHERE UserId = (SELECT Id FROM Users WHERE Username = @Username);";
+            command.Parameters.AddWithValue("@Username", ViewData["Username"].ToString());
+            var reader = command.ExecuteReader();
+            List<String> dataList = new List<String>();
+            while (reader.Read())
+            {
+                dataList.Add(new String(reader.GetString(1)));
+            }
+            ViewData["DataList"] = dataList;
+
+            // print datalist
+            foreach (var item in dataList)
+            {
+                System.Console.WriteLine(item);
+            }
+        }
         return View();
     }
 
+    /* -------------------------------- Add data -------------------------------- */
     [HttpPost]
     [Route("/data")]
     public IActionResult Data(IFormCollection form)
@@ -158,14 +192,19 @@ public class LoginController : Controller
         if (form is null)
             return View();
 
-        using (var connection = new SqliteConnection("Data Source=db.db"))
+
+        using (var connection = new SqliteConnection("Data Source=" + data_base_name))
+
         {
-            String username = form["username"].ToString();
-            String content = form["content"].ToString();
+
+            String username = HttpContext.Session.GetString("Username");
+            String content = form["data"].ToString();
 
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO Data (Content, UserId) VALUES (@Content, @Username);";
+            command.CommandText = "INSERT INTO Data (Content, UserId) VALUES (@Content, (SELECT Id FROM Users WHERE Username = @Username));";
+            System.Console.WriteLine(username);
+            System.Console.WriteLine(content);
             command.Parameters.AddWithValue("@Username", username);
             command.Parameters.AddWithValue("@Content", content);
             command.ExecuteNonQuery();
@@ -174,7 +213,7 @@ public class LoginController : Controller
 
         }
 
-        return View();
+        return Data();
     }
 
 
@@ -187,3 +226,23 @@ public class LoginController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
+
+
+
+
+
+
+    // private string MD5Hash1(string input)
+    // {
+    //     using (var md5 = MD5.Create())
+    //     {
+    //         byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+    //         byte[] hashBytes = md5.ComputeHash(inputBytes);
+    //         var sb = new StringBuilder();
+    //         for (int i = 0; i < hashBytes.Length; i++)
+    //         {
+    //             sb.Append(hashBytes[i].ToString("X2"));
+    //         }
+    //         return sb.ToString();
+    //     }
+    // }

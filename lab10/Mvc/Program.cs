@@ -4,8 +4,6 @@ using Microsoft.Data.Sqlite;
 /*                                  DataBase                                  */
 /* -------------------------------------------------------------------------- */
 
-
-
 internal class Program
 {
     private static void Main(string[] args)
@@ -21,7 +19,8 @@ internal class Program
         Command.CommandText = createTable;
         Command.ExecuteNonQuery();
 
-        string dataTable = "CREATE TABLE IF NOT EXISTS Data (id INTEGER PRIMARY KEY AUTOINCREMENT, Content TEXT NOT NULL, UserId INTEGER NOT NULL REFERENCES Users(id));";
+        string dataTable = "DROP TABLE IF EXISTS Data; CREATE TABLE IF NOT EXISTS Data (id INTEGER PRIMARY KEY AUTOINCREMENT, Content TEXT NOT NULL, UserId INTEGER NOT NULL REFERENCES Users(id));";
+        // string dataTable = "CREATE TABLE IF NOT EXISTS Data (id INTEGER PRIMARY KEY AUTOINCREMENT, Content TEXT NOT NULL, UserId INTEGER NOT NULL REFERENCES Users(id));";
         Command.CommandText = dataTable;
         Command.ExecuteNonQuery();
     
@@ -37,7 +36,7 @@ internal class Program
         // Add services to the container.
         builder.Services.AddControllersWithViews();
 
-        //Dodanie obsługo sesji
+        //Session handling
         builder.Services.AddDistributedMemoryCache();
 
         builder.Services.AddSession(options =>
@@ -65,13 +64,14 @@ internal class Program
 
         app.UseAuthorization();
 
-        //Dodanie obsługo sesji
+        //Session handling
         app.UseSession();
         //KONIEC
 
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Login}/{action=login}/{id?}");
+        app.UseStatusCodePagesWithReExecute("/");
 
         app.Use(async (ctx, next) =>
         {
