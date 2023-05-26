@@ -11,7 +11,7 @@ class Program2
     static public void Exec()
     {
         // Zapis do pliku
-        string nazwaPliku = "plik.txt";
+        string nazwaPliku = "plik.txt";
         StreamWriter sw;
         if (File.Exists(nazwaPliku))
             sw = new StreamWriter(nazwaPliku, append: true);
