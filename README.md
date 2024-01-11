@@ -5,9 +5,6 @@ This repository contains full C# course, held on the Computer Science and Intell
 The final project is a ASP.NET Core MVC application, in my case a library management system. Project is available [here](https://github.com/lursz/MVC-Library). 
 
 ## Table of contents
-
-The fortnight's assignments' pdfs can be seen here:
-
 | Description  | Lecture | Assignment | Solution |
 | ------------- | ------------- | ------------- | ------------- |
 | 01. Pierwsze aplikacje konsolowe C# .NET Framework Core 7.0  | [lecture1.md](Lectures/01.%20Pierwsze%20aplikacje%20konsolowe%20C#%20.NET%20Framework%20Core%207.0.md)  | [lab1](lab1/README.md) | [solution1](https://github.com/lursz/CSharp-Uni-Course/tree/main/lab1)|
