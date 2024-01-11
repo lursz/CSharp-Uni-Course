@@ -20,6 +20,6 @@ The fortnight's assignments' pdfs can be seen here:
 | 08. SQLite  | [lecture8.md](Lectures/08.%20SQLite.md)  | [lab8](lab8/README.md) | [solution8](https://github.com/lursz/CSharp-Uni-Course/tree/main/lab8)|
 | 09. ASP.NET Core MVC: kontrolery, widoki Razor, strony Razor  | [lecture9.md](Lectures/09.%20Aspnetmvc.md)  | [lab9](lab9/README.md) | [solution9](https://github.com/lursz/CSharp-Uni-Course/tree/main/lab9)|
 | 10. Aplikacja ASP.NET Core z bazą danych  | [lecture10.md](Lectures/10.%20Aspnetmvc%202.md)  | [lab10](lab10/README.md) | [solution10](https://github.com/lursz/CSharp-Uni-Course/tree/main/lab10)|
-| 11. REST API | [lecture11.md](Lectures/11.%20REST%20API.md)  | [lab11](lab11/README.md) | [solution11](https://github.com/lursz/CSharp-Uni-Course/tree/main/lab11)|
+| 11. REST API | [lecture11.md](Lectures/11.%20REST%20API.md)  | [lab11](lab11/README.md) | [solution11](https://github.com/lursz/MVC-Library)|
 | 12. Podstawy programowania reaktywnego  | [lecture12.md](Lectures/12.%20Reactive.md)  | - | - |
 | 13. Kod nienadzorowany i wzorce projektowe  | [lecture13.md](Lectures/13.%20Kodnienadzorowany.md)  | - | - |
